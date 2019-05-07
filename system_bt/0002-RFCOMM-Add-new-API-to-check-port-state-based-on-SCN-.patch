@@ -1,0 +1,137 @@
+From 293ec335aeb1e7d676725fab417a461cbeb48f76 Mon Sep 17 00:00:00 2001
+From: Venkata Jagadeesh Garaga <vgaraga@codeaurora.org>
+Date: Fri, 19 Apr 2019 23:32:14 +0200
+Subject: [PATCH 2/3] RFCOMM: Add new API to check port state based on SCN As
+ there is no API in RFCOMM to check exact port status, AG checking port
+ opening state and continuing outgoing connection even incoming port already
+ opened.
+
+Hence added new API to check port state based on SCN.
+
+Change-Id: Ib3837f6f61e25c4bbc3b79a9721fba35f55c42d3
+CRs-Fixed: 2322822
+Signed-off-by: DennySPB <dennyspb@gmail.com>
+---
+ stack/include/port_api.h | 17 +++++++++++++
+ stack/rfcomm/port_api.cc | 53 ++++++++++++++++++++++++++++++++++++++++
+ stack/rfcomm/port_int.h  | 10 +++++---
+ 3 files changed, 76 insertions(+), 4 deletions(-)
+
+diff --git a/stack/include/port_api.h b/stack/include/port_api.h
+index aedbe748b..96a2f693f 100644
+--- a/stack/include/port_api.h
++++ b/stack/include/port_api.h
+@@ -89,6 +89,11 @@ typedef struct {
+ 
+ } tPORT_STATE;
+ 
++#define PORT_STATE_CLOSED 0
++#define PORT_STATE_OPENING 1
++#define PORT_STATE_OPENED 2
++#define PORT_STATE_CLOSING 3
++
+ /*
+  * Define the callback function prototypes.  Parameters are specific
+  * to each event and are described bellow
+@@ -649,4 +654,16 @@ extern uint8_t PORT_SetTraceLevel(uint8_t new_level);
+  ******************************************************************************/
+ extern const char* PORT_GetResultString(const uint8_t result_code);
+ 
++/*******************************************************************************
++ *
++ * Function         PORT_GetStateBySCN
++ *
++ * Description      This function retrun the current port state
++ *
++ *
++ * Parameters:      SCN     - Server Channel of the port
++ *                  bd_addr    - bd_addr of the peer
++ *
++ ******************************************************************************/
++extern int PORT_GetStateBySCN(const RawAddress& bd_addr, uint32_t scn_id);
+ #endif /* PORT_API_H */
+diff --git a/stack/rfcomm/port_api.cc b/stack/rfcomm/port_api.cc
+index 1ae866751..214a436e1 100644
+--- a/stack/rfcomm/port_api.cc
++++ b/stack/rfcomm/port_api.cc
+@@ -1749,3 +1749,56 @@ const char* PORT_GetResultString(const uint8_t result_code) {
+ 
+   return result_code_strings[result_code];
+ }
++
++/*******************************************************************************
++ *
++ * Function         PORT_GetStateBySCN
++ *
++ * Description      This function retrun the current port state
++ *
++ *
++ * Parameters:      SCN     - Server Channel of the port
++ *                  bd_addr    - bd_addr of the peer
++ *
++ ******************************************************************************/
++int PORT_GetStateBySCN(const RawAddress& bd_addr, uint32_t scn_id) {
++  uint8_t xx, yy;
++  tRFC_MCB* p_mcb = NULL;
++  tPORT* p_port;
++  bool found_port = false;
++
++  /* Get the mcb with address */
++  for (xx = 0; xx < MAX_BD_CONNECTIONS; xx++) {
++    if (bd_addr == rfc_cb.port.rfc_mcb[xx].bd_addr) {
++      p_mcb = &rfc_cb.port.rfc_mcb[xx];
++      break;
++    }
++  }
++  if (p_mcb == NULL) {
++    return PORT_STATE_CLOSED;
++  } else if ((rfc_cb.port.rfc_mcb[xx].state > RFC_MX_STATE_IDLE) &&
++             (rfc_cb.port.rfc_mcb[xx].state < RFC_MX_STATE_CONNECTED)) {
++    return PORT_STATE_OPENING;
++  } else if (rfc_cb.port.rfc_mcb[xx].state == RFC_MX_STATE_CONNECTED) {
++
++    p_port = &rfc_cb.port.port[0];
++
++    for (yy = 0; yy < MAX_RFC_PORTS; yy++, p_port++) {
++      if ((p_port->rfc.p_mcb == p_mcb) && (p_port->scn == scn_id)){
++        found_port = true;
++        break;
++      }
++    }
++    if ((!found_port) ||
++        (found_port && (p_port->rfc.state < RFC_STATE_OPENED))) {
++      /* Port is not established yet. */
++      return PORT_STATE_OPENING;
++    } else if(found_port && (p_port->rfc.state == RFC_STATE_OPENED)) {
++
++      /* Port already established. */
++      return PORT_STATE_OPENED;
++    }
++  }
++  /* should not come to this line ,some thing wrong */
++  return PORT_STATE_CLOSED;
++}
+diff --git a/stack/rfcomm/port_int.h b/stack/rfcomm/port_int.h
+index db7d0fdf4..499c349a7 100644
+--- a/stack/rfcomm/port_int.h
++++ b/stack/rfcomm/port_int.h
+@@ -142,10 +142,12 @@ typedef struct {
+   uint8_t inx; /* Index of this control block in the port_info array */
+   bool in_use; /* True when structure is allocated */
+ 
+-#define PORT_STATE_CLOSED 0
+-#define PORT_STATE_OPENING 1
+-#define PORT_STATE_OPENED 2
+-#define PORT_STATE_CLOSING 3
++  /* port current state
++  * PORT_STATE_CLOSED 0
++  * PORT_STATE_OPENING 1
++  * PORT_STATE_OPENED 2
++  * PORT_STATE_CLOSING 3
++  */
+ 
+   uint8_t state; /* State of the application */
+ 
+-- 
+2.20.1
+

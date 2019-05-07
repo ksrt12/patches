@@ -1,0 +1,72 @@
+From 4ce453c9ff0348146df8117205fb2b0f15c50e17 Mon Sep 17 00:00:00 2001
+From: Kazakov Stepan <ksrt12group@gmail.com>
+Date: Tue, 22 Jan 2019 12:28:08 +0300
+Subject: [PATCH 05/11] toggle torch proximity check [1/2]
+
+Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
+---
+ core/java/android/provider/Settings.java               |  5 +++++
+ .../com/android/server/policy/PhoneWindowManager.java  | 10 +++++++++-
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
+index 8c3f8af776c4..30572eeb72b3 100644
+--- a/core/java/android/provider/Settings.java
++++ b/core/java/android/provider/Settings.java
+@@ -5202,6 +5202,11 @@ public final class Settings {
+          */
+         public static final String POWERMENU_LOCKSCREEN = "powermenu_lockscreen";
+ 
++        /**
++         * @hide
++         */
++        public static final String POWER_BUTTON_TORCH_CHECK = "power_button_torch_check";
++
+         /**
+          * Whether to display cross sign for a data disabled connection
+          * @hide
+diff --git a/services/core/java/com/android/server/policy/PhoneWindowManager.java b/services/core/java/com/android/server/policy/PhoneWindowManager.java
+index 262a325a81d1..16ea027c68fb 100644
+--- a/services/core/java/com/android/server/policy/PhoneWindowManager.java
++++ b/services/core/java/com/android/server/policy/PhoneWindowManager.java
+@@ -963,6 +963,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+ 
+     private boolean mHasPermanentMenuKey;
+ 
++    private boolean mTorchProximityCheck;
++
+     private boolean mClearedBecauseOfForceShow;
+     private boolean mTopWindowIsKeyguard;
+ 
+@@ -1147,7 +1149,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+     }
+ 
+     private void toggleFlashLightProximityCheck() {
+-        if (mProximitySensor != null && mProximityTimeOut != -1) {
++        if (mProximitySensor != null && mProximityTimeOut != -1 && mTorchProximityCheck) {
+             if (mHandler.hasMessages(MSG_CLEAR_PROXIMITY)) {
+                 // A message is already queued
+                 return;
+@@ -1312,6 +1314,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+             resolver.registerContentObserver(Settings.System.getUriFor(
+                     Settings.System.BOTTOM_GESTURE_FEEDBACK_DURATION), false, this,
+                     UserHandle.USER_ALL);
++            resolver.registerContentObserver(Settings.System.getUriFor(
++                    Settings.System.POWER_BUTTON_TORCH_CHECK), false, this,
++                    UserHandle.USER_ALL);
+             resolver.registerContentObserver(Settings.System.getUriFor(
+                     Settings.System.USE_EDGE_SERVICE_FOR_GESTURES), false, this,
+                     UserHandle.USER_ALL);
+@@ -3278,6 +3283,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+             mVolumeRockerWake = Settings.System.getIntForUser(resolver,
+                     Settings.System.VOLUME_ROCKER_WAKE, 0, UserHandle.USER_CURRENT) != 0;
+ 
++            mTorchProximityCheck = Settings.System.getIntForUser(resolver,
++                    Settings.System.POWER_BUTTON_TORCH_CHECK, 0, UserHandle.USER_CURRENT) == 1;
++
+ 	        // home wake button
+             mHomeWakeButton = Settings.System.getIntForUser(resolver,
+                     Settings.System.HOME_WAKE_BUTTON, 0, UserHandle.USER_CURRENT) != 0;
+-- 
+2.20.1
+
