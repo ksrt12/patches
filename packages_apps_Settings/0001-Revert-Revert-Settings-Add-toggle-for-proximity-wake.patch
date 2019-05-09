@@ -1,0 +1,133 @@
+From adcef3f27b8a54c16b6b6696c78e085befcd4acc Mon Sep 17 00:00:00 2001
+From: Kazakov Stepan <ksrt12group@gmail.com>
+Date: Thu, 9 May 2019 10:30:26 +0300
+Subject: [PATCH] Revert "Revert "Settings: Add toggle for proximity wake""
+
+This reverts commit ad8520a077a8278185c0e139561ee39fd6526716.
+---
+ res/values/havoc_strings.xml                  |  4 ++
+ res/xml/display_settings.xml                  |  5 ++
+ src/com/android/settings/DisplaySettings.java |  2 +
+ .../ProximityOnWakePreferenceController.java  | 59 +++++++++++++++++++
+ 4 files changed, 70 insertions(+)
+ create mode 100644 src/com/android/settings/display/ProximityOnWakePreferenceController.java
+
+diff --git a/res/values/havoc_strings.xml b/res/values/havoc_strings.xml
+index 17e416b480..6a380bbc55 100644
+--- a/res/values/havoc_strings.xml
++++ b/res/values/havoc_strings.xml
+@@ -371,6 +371,10 @@
+     <!-- Volume settings - Volume adjustment sound -->
+     <string name="volume_adjust_sounds_title">Volume key sounds</string>
+ 
++    <!-- Proximity wake -->
++    <string name="proximity_wake_title">Prevent accidental wake-up</string>
++    <string name="proximity_wake_summary">Check the proximity sensor prior to waking up screen</string>
++
+ 	<string name="system_update_settings_summary">Check for Havoc-OS updates</string>
+ 
+     <string name="full_gesture_mode_title">Enable full gesture mode</string>
+diff --git a/res/xml/display_settings.xml b/res/xml/display_settings.xml
+index 346970c5c7..3ae0240b58 100644
+--- a/res/xml/display_settings.xml
++++ b/res/xml/display_settings.xml
+@@ -127,6 +127,11 @@
+         android:title="@string/home_wake_button_title"
+         android:summary="@string/home_wake_button_summary" />
+ 
++    <com.havoc.support.preferences.SystemSettingSwitchPreference
++        android:key="proximity_on_wake"
++        android:title="@string/proximity_wake_title"
++        android:summary="@string/proximity_wake_summary" />
++
+     <ListPreference
+         android:key="theme"
+         android:title="@string/color_theme"
+diff --git a/src/com/android/settings/DisplaySettings.java b/src/com/android/settings/DisplaySettings.java
+index d1da3b378e..10b7c7f32b 100644
+--- a/src/com/android/settings/DisplaySettings.java
++++ b/src/com/android/settings/DisplaySettings.java
+@@ -30,6 +30,7 @@ import com.android.settings.display.ColorModePreferenceController;
+ import com.android.settings.display.LiftToWakePreferenceController;
+ import com.android.settings.display.NightDisplayPreferenceController;
+ import com.android.settings.display.NightModePreferenceController;
++import com.android.settings.display.ProximityOnWakePreferenceController;
+ import com.android.settings.display.HomeWakeButtonPreferenceController;
+ import com.android.settings.display.ScreenSaverPreferenceController;
+ import com.android.settings.display.ShowOperatorNamePreferenceController;
+@@ -88,6 +89,7 @@ public class DisplaySettings extends DashboardFragment {
+         controllers.add(new LiftToWakePreferenceController(context));
+         controllers.add(new NightDisplayPreferenceController(context));
+         controllers.add(new NightModePreferenceController(context));
++        controllers.add(new ProximityOnWakePreferenceController(context));
+         controllers.add(new HomeWakeButtonPreferenceController(context));      
+         controllers.add(new ScreenSaverPreferenceController(context));
+         controllers.add(new AmbientDisplayPreferenceController(
+diff --git a/src/com/android/settings/display/ProximityOnWakePreferenceController.java b/src/com/android/settings/display/ProximityOnWakePreferenceController.java
+new file mode 100644
+index 0000000000..2ea6e7ef47
+--- /dev/null
++++ b/src/com/android/settings/display/ProximityOnWakePreferenceController.java
+@@ -0,0 +1,59 @@
++/*
++ * Copyright (C) 2016 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
++ * except in compliance with the License. You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software distributed under the
++ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the specific language governing
++ * permissions and limitations under the License.
++ */
++package com.android.settings.display;
++
++import android.content.Context;
++import android.provider.Settings;
++import android.support.v14.preference.SwitchPreference;
++import android.support.v7.preference.Preference;
++
++import com.android.settingslib.core.AbstractPreferenceController;
++import com.havoc.support.preferences.SystemSettingSwitchPreference;
++import com.android.settings.core.PreferenceControllerMixin;
++
++public class ProximityOnWakePreferenceController extends AbstractPreferenceController implements
++        Preference.OnPreferenceChangeListener, PreferenceControllerMixin {
++
++    private static final String KEY_PROXIMITY_WAKE = "proximity_on_wake";
++
++    public ProximityOnWakePreferenceController(Context context) {
++        super(context);
++    }
++
++    @Override
++    public String getPreferenceKey() {
++        return KEY_PROXIMITY_WAKE;
++    }
++
++    @Override
++    public boolean isAvailable() {
++        return mContext.getResources().getBoolean(
++                com.android.internal.R.bool.config_proximityCheckOnWake);
++    }
++
++    @Override
++    public void updateState(Preference preference) {
++        int value = Settings.System.getInt(
++                mContext.getContentResolver(), Settings.System.PROXIMITY_ON_WAKE, 1);
++        ((SwitchPreference) preference).setChecked(value != 0);
++    }
++
++    @Override
++    public boolean onPreferenceChange(Preference preference, Object newValue) {
++        boolean value = (Boolean) newValue;
++        Settings.System.putInt(
++                mContext.getContentResolver(), Settings.System.PROXIMITY_ON_WAKE, value ? 1 : 0);
++        return true;
++    }
++}
+-- 
+2.20.1
+

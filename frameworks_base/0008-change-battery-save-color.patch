@@ -1,7 +1,7 @@
-From b04784ccc5c25103bff8a5dc7ace14e319b0292f Mon Sep 17 00:00:00 2001
+From bdfae6a2a00c50a3786f468b96a798b712cc614d Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Thu, 31 Jan 2019 19:05:34 +0300
-Subject: [PATCH 07/11] change battery save color
+Subject: [PATCH 08/12] change battery save color
 
 Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
 ---

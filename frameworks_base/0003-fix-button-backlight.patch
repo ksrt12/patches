@@ -1,7 +1,7 @@
-From a9e4680af5b1cd8e121e8d09e8a9a88d7a3f63f5 Mon Sep 17 00:00:00 2001
+From 5e72a4f6338b73e9f1bd1311994a0467fd73e2fb Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Mon, 3 Dec 2018 00:03:51 +0300
-Subject: [PATCH 02/11] fix button backlight
+Subject: [PATCH 03/12] fix button backlight
 
 Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
 ---
@@ -87,7 +87,7 @@ index d4e7ca13a7f9..2cb5aeeeb2e6 100644
       * Used by the window manager to override the user activity timeout based on the
       * current foreground activity.  It can only be used to make the timeout shorter
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index 16794a928d8f..8c3f8af776c4 100644
+index 5b051323b3be..3b5b5eaa3ea5 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
 @@ -3324,26 +3324,6 @@ public final class Settings {
@@ -156,7 +156,7 @@ index 16794a928d8f..8c3f8af776c4 100644
          /** 
           * Screen stabilization parameters
           * @hide
-@@ -6787,6 +6799,11 @@ public final class Settings {
+@@ -6931,6 +6943,11 @@ public final class Settings {
              PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_STATE);
              PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_TYPE);
              PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD);
@@ -169,7 +169,7 @@ index 16794a928d8f..8c3f8af776c4 100644
              PRIVATE_SETTINGS.add(VOLUME_KEYS_CONTROL_RING_TONE);
              PRIVATE_SETTINGS.add(THEMING_SETTINGS_DASHBOARD_ICONS);
 diff --git a/core/res/res/values/havoc_config.xml b/core/res/res/values/havoc_config.xml
-index b055849c98c6..b975d7459279 100644
+index 5647e796c35f..b68a31b15e39 100644
 --- a/core/res/res/values/havoc_config.xml
 +++ b/core/res/res/values/havoc_config.xml
 @@ -40,9 +40,6 @@
@@ -193,7 +193,7 @@ index b055849c98c6..b975d7459279 100644
      <bool name="config_oldQtiTelephony">true</bool>
  
 diff --git a/core/res/res/values/havoc_symbols.xml b/core/res/res/values/havoc_symbols.xml
-index 9939e48b820e..5b951617e315 100644
+index 083a76f267e9..24c93e2e38d6 100644
 --- a/core/res/res/values/havoc_symbols.xml
 +++ b/core/res/res/values/havoc_symbols.xml
 @@ -27,9 +27,6 @@
@@ -218,7 +218,7 @@ index 9939e48b820e..5b951617e315 100644
    <java-symbol type="drawable" name="weather_clear_night" />
    <java-symbol type="drawable" name="weather_cloudy" />
 diff --git a/services/core/java/com/android/server/notification/NotificationManagerService.java b/services/core/java/com/android/server/notification/NotificationManagerService.java
-index a2fe99da8040..b00615529abb 100644
+index aa755811e37c..aa86dd933a11 100644
 --- a/services/core/java/com/android/server/notification/NotificationManagerService.java
 +++ b/services/core/java/com/android/server/notification/NotificationManagerService.java
 @@ -1243,7 +1243,7 @@ public class NotificationManagerService extends SystemService {

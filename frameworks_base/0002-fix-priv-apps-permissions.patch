@@ -1,7 +1,7 @@
-From 098753dea4650251211cf6f7076be6af8cc1c75e Mon Sep 17 00:00:00 2001
+From d07d043add6e7abdff8d6eac766539de7ce57f37 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Sat, 10 Nov 2018 18:16:14 +0300
-Subject: [PATCH 01/11] fix priv-apps permissions
+Subject: [PATCH 02/12] fix priv-apps permissions
 
 Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
 ---

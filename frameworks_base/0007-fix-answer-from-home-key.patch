@@ -1,7 +1,7 @@
-From bb7c4cd27bdc072237cd300fd7351e0103ed76a5 Mon Sep 17 00:00:00 2001
+From 3df6c29ef7e306ced5e81dd9355a7a2084edf0f5 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Tue, 22 Jan 2019 13:15:01 +0300
-Subject: [PATCH 06/11] fix answer from home key
+Subject: [PATCH 07/12] fix answer from home key
 
 Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/services/core/java/com/android/server/policy/PhoneWindowManager.java b/services/core/java/com/android/server/policy/PhoneWindowManager.java
-index 16ea027c68fb..990796f19df5 100644
+index a2ffd52e2448..6f06ddfb63e1 100644
 --- a/services/core/java/com/android/server/policy/PhoneWindowManager.java
 +++ b/services/core/java/com/android/server/policy/PhoneWindowManager.java
 @@ -3414,7 +3414,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {

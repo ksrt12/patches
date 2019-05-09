@@ -1,0 +1,94 @@
+From ebeccf3bd46a8a2fd8642f46b6c5822f1749c834 Mon Sep 17 00:00:00 2001
+From: Kazakov Stepan <ksrt12group@gmail.com>
+Date: Thu, 9 May 2019 10:29:32 +0300
+Subject: [PATCH] Revert "Pocket judge"
+
+This reverts commit 4845d7b1883403e5fcd0d24c1424b6e94fe3a7d2.
+---
+ res/values/havoc_strings.xml          |  4 ----
+ res/xml/havoc_settings_display.xml    | 10 +++++-----
+ res/xml/havoc_settings_lockscreen.xml |  6 ------
+ 3 files changed, 5 insertions(+), 15 deletions(-)
+
+diff --git a/res/values/havoc_strings.xml b/res/values/havoc_strings.xml
+index 06754f2..73393fb 100644
+--- a/res/values/havoc_strings.xml
++++ b/res/values/havoc_strings.xml
+@@ -1659,10 +1659,6 @@
+     <string name="lockscreen_solid_fudge_factor_title">Sanity level</string>
+     <string name="lockscreen_solid_units_opacity_title">Lines opacity</string>
+ 
+-    <!-- Pocket judge -->
+-    <string name="pocket_judge_title">Pocket detection</string>
+-    <string name="pocket_judge_summary">Block screen and button inputs when device is in pocket</string>
+-
+     <!-- Notch: Full screen apps -->
+     <string name="display_cutout_force_fullscreen_title">Full screen apps</string>
+     <string name="display_cutout_force_fullscreen_summary">Force apps to ignore notch space</string>
+diff --git a/res/xml/havoc_settings_display.xml b/res/xml/havoc_settings_display.xml
+index 7ba9c12..971b1cf 100644
+--- a/res/xml/havoc_settings_display.xml
++++ b/res/xml/havoc_settings_display.xml
+@@ -39,7 +39,7 @@
+             android:key="sysui_rounded_fwvals"
+             android:title="@string/corner_fwvals"
+             android:summary="@string/corner_fwvals_summary"
+-            android:defaultValue="true"
++            android:defaultValue="false"
+             android:disableDependentsState="true" />
+ 
+ 	    <com.havoc.support.preferences.CustomSeekBarPreference
+@@ -48,7 +48,7 @@
+             android:max="80"
+             settings:min="0"
+             settings:units="dp"
+-            android:defaultValue="0"
++            android:defaultValue="12"
+             android:persistent="false"
+             android:dependency="sysui_rounded_fwvals" />
+ 
+@@ -58,7 +58,7 @@
+             android:max="30"
+             settings:min="0"
+             settings:units="dp"
+-            android:defaultValue="16"
++            android:defaultValue="7"
+             android:persistent="false"
+             android:dependency="sysui_rounded_fwvals" />
+ 
+@@ -68,7 +68,7 @@
+             android:max="30"
+             settings:min="0"
+             settings:units="dp"
+-            android:defaultValue="0"
++            android:defaultValue="3"
+             android:persistent="false"
+             android:dependency="sysui_rounded_fwvals" />
+ 
+@@ -86,4 +86,4 @@
+ 
+     </PreferenceCategory>
+ 
+-</PreferenceScreen>
+\ No newline at end of file
++</PreferenceScreen>
+diff --git a/res/xml/havoc_settings_lockscreen.xml b/res/xml/havoc_settings_lockscreen.xml
+index e745308..50dd2c0 100644
+--- a/res/xml/havoc_settings_lockscreen.xml
++++ b/res/xml/havoc_settings_lockscreen.xml
+@@ -108,12 +108,6 @@
+             android:summary="@string/fp_unlock_keystore_summary" 
+             android:defaultValue="false" /> 
+ 
+-        <com.havoc.support.preferences.SystemSettingSwitchPreference
+-            android:key="pocket_judge" 
+-            android:title="@string/pocket_judge_title" 
+-            android:summary="@string/pocket_judge_summary" 
+-            android:defaultValue="false" />	
+-
+         <com.havoc.support.preferences.SecureSettingSwitchPreference
+             android:key="face_auto_unlock"
+             android:title="@string/face_auto_unlock_title"
+-- 
+2.20.1
+

@@ -1,7 +1,7 @@
-From a0bcb90d5915c4055e2eaac2cbfa6000da6012f9 Mon Sep 17 00:00:00 2001
+From 4eb7c412a089a918ac493008c3d5bcffe22b0889 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?eray=20or=C3=A7unus?= <erayorcunus@gmail.com>
 Date: Fri, 4 Aug 2017 00:23:20 +0300
-Subject: [PATCH 09/11] Keyguard: Don't listen for fingerprint when prox.sensor
+Subject: [PATCH 10/12] Keyguard: Don't listen for fingerprint when prox.sensor
  is covered
 
 * It's being added as an extra feature over
@@ -21,10 +21,10 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  3 files changed, 76 insertions(+), 3 deletions(-)
 
 diff --git a/core/res/res/values/config.xml b/core/res/res/values/config.xml
-index cd3228c6cfe6..aa884dd6bb8f 100644
+index 44fa1736bb45..6fbfc402c148 100644
 --- a/core/res/res/values/config.xml
 +++ b/core/res/res/values/config.xml
-@@ -3529,6 +3529,10 @@
+@@ -3569,6 +3569,10 @@
  
      <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
      <bool name="config_swipe_up_gesture_setting_available">true</bool>
@@ -36,10 +36,10 @@ index cd3228c6cfe6..aa884dd6bb8f 100644
      <!-- The duration (in milliseconds) for the outgoing sms authorization request to timeout.-->
      <integer name="config_sms_authorization_timeout_ms">0</integer>
 diff --git a/core/res/res/values/symbols.xml b/core/res/res/values/symbols.xml
-index 00e1905f1f10..41d626b383c2 100644
+index 102f8f054028..bd052c9b02be 100644
 --- a/core/res/res/values/symbols.xml
 +++ b/core/res/res/values/symbols.xml
-@@ -2945,6 +2945,9 @@
+@@ -2948,6 +2948,9 @@
    <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
    <java-symbol type="bool" name="config_dozePulsePickup" />
  
@@ -50,7 +50,7 @@ index 00e1905f1f10..41d626b383c2 100644
    <java-symbol type="drawable" name="ic_doc_apk" />
    <java-symbol type="drawable" name="ic_doc_audio" />
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
-index 5a08abcdc71e..7ba7fbab8535 100644
+index a13243f8c1d9..7991d05d9dc8 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 +++ b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 @@ -52,6 +52,10 @@ import android.database.ContentObserver;
@@ -206,7 +206,7 @@ index 5a08abcdc71e..7ba7fbab8535 100644
  
      private void startListeningForFingerprint() {
          if (mFingerprintRunningState == FINGERPRINT_STATE_CANCELLING) {
-@@ -1722,6 +1780,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+@@ -1734,6 +1792,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
          mNeedsSlowUnlockTransition = resolveNeedsSlowUnlockTransition();
      }
  
