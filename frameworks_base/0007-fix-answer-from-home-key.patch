@@ -1,4 +1,4 @@
-From 3df6c29ef7e306ced5e81dd9355a7a2084edf0f5 Mon Sep 17 00:00:00 2001
+From 3bdc88028bdb58e82e27531c0fb8c0e7bf4e38bd Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Tue, 22 Jan 2019 13:15:01 +0300
 Subject: [PATCH 07/12] fix answer from home key
@@ -9,10 +9,10 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/services/core/java/com/android/server/policy/PhoneWindowManager.java b/services/core/java/com/android/server/policy/PhoneWindowManager.java
-index a2ffd52e2448..6f06ddfb63e1 100644
+index a3fa3c891be6..32574eb5ce97 100644
 --- a/services/core/java/com/android/server/policy/PhoneWindowManager.java
 +++ b/services/core/java/com/android/server/policy/PhoneWindowManager.java
-@@ -3414,7 +3414,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -3418,7 +3418,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              }
  
              mIncallHomeBehavior = (Settings.System.getIntForUser(resolver,
@@ -21,7 +21,7 @@ index a2ffd52e2448..6f06ddfb63e1 100644
  
  
              mUseGestureButton = Settings.System.getIntForUser(resolver,
-@@ -4693,12 +4693,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -4701,12 +4701,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                      return -1;
                  }
  

@@ -1,4 +1,4 @@
-From c2799d2c7984f365462acda460e50b3f673d2bd5 Mon Sep 17 00:00:00 2001
+From 5be0945617038806a5fe2522ee70af42e97a254a Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Sun, 17 Feb 2019 23:03:50 +0300
 Subject: [PATCH 05/12] proximity check for all wake keys
@@ -22,10 +22,10 @@ index 86554fee04b9..36bea199c984 100644
              case KeyEvent.KEYCODE_WAKEUP:
              case KeyEvent.KEYCODE_PAIRING:
 diff --git a/services/core/java/com/android/server/policy/PhoneWindowManager.java b/services/core/java/com/android/server/policy/PhoneWindowManager.java
-index edf971a8fa42..db55fd9c0a5e 100644
+index 0f70069f99bc..48b60086c6fc 100644
 --- a/services/core/java/com/android/server/policy/PhoneWindowManager.java
 +++ b/services/core/java/com/android/server/policy/PhoneWindowManager.java
-@@ -7756,8 +7756,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -7772,8 +7772,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          }
  
          if (isWakeKey) {

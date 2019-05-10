@@ -1,4 +1,4 @@
-From 39b8e65438d4e03037bf4154e46d8fef0731f40b Mon Sep 17 00:00:00 2001
+From ff1d2b1c66d92211026a0c82bfc30aed05ffc76e Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Thu, 9 May 2019 10:20:40 +0300
 Subject: [PATCH 01/12] for gemini: Revert "Revert "Proximity check on wake""
@@ -61,15 +61,15 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  core/res/res/values/havoc_strings.xml         |   3 -
  core/res/res/values/havoc_symbols.xml         |  18 +-
  .../android/keyguard/KeyguardHostView.java    |   5 +-
- .../keyguard/KeyguardUpdateMonitor.java       |  37 +-
+ .../keyguard/KeyguardUpdateMonitor.java       |  35 -
  .../server/pocket/PocketBridgeService.java    | 177 -----
  .../android/server/pocket/PocketService.java  | 751 ------------------
  .../policy/ImmersiveModeConfirmation.java     |   8 +-
  .../server/policy/PhoneWindowManager.java     | 216 +----
  .../server/policy/pocket/PocketLock.java      | 190 -----
- .../server/power/PowerManagerService.java     | 148 +++-
+ .../server/power/PowerManagerService.java     | 147 +++-
  .../java/com/android/server/SystemServer.java |  12 -
- 24 files changed, 233 insertions(+), 1780 deletions(-)
+ 24 files changed, 231 insertions(+), 1779 deletions(-)
  delete mode 100644 core/java/android/pocket/IPocketCallback.aidl
  delete mode 100644 core/java/android/pocket/IPocketService.aidl
  delete mode 100644 core/java/android/pocket/PocketConstants.java
@@ -546,7 +546,7 @@ index 925f52a961ab..000000000000
 -
 -}
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index 6614b31a371b..5b051323b3be 100644
+index 15af3a940cd3..76a50d4782a0 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
 @@ -4063,6 +4063,12 @@ public final class Settings {
@@ -594,9 +594,9 @@ index 6614b31a371b..5b051323b3be 100644
 -        public static final Validator POCKET_JUDGE_VALIDATOR = BOOLEAN_VALIDATOR;
 -
          /**
-          * Settings to backup. This is here so that it's in the same place as the settings
-          * keys and easy to update.
-@@ -6997,7 +6999,6 @@ public final class Settings {
+          * @hide
+          */
+@@ -7007,7 +7009,6 @@ public final class Settings {
              PRIVATE_SETTINGS.add(DISPLAY_COLOR_ADJUSTMENT);
              PRIVATE_SETTINGS.add(DISPLAY_PICTURE_ADJUSTMENT);
              PRIVATE_SETTINGS.add(LIVE_DISPLAY_HINTED);
@@ -604,7 +604,7 @@ index 6614b31a371b..5b051323b3be 100644
          }
  
          /**
-@@ -7189,7 +7190,6 @@ public final class Settings {
+@@ -7199,7 +7200,6 @@ public final class Settings {
              VALIDATORS.put(DISPLAY_COLOR_ADJUSTMENT, DISPLAY_COLOR_ADJUSTMENT_VALIDATOR);
              VALIDATORS.put(DISPLAY_PICTURE_ADJUSTMENT, DISPLAY_PICTURE_ADJUSTMENT_VALIDATOR);
              VALIDATORS.put(LIVE_DISPLAY_HINTED, LIVE_DISPLAY_HINTED_VALIDATOR);
@@ -661,7 +661,7 @@ index 2eca671011d4..000000000000
 -
 -</LinearLayout>
 diff --git a/core/res/res/values/havoc_config.xml b/core/res/res/values/havoc_config.xml
-index a86b1a2abfd2..5647e796c35f 100644
+index c4f030e6d283..1877befd95d0 100644
 --- a/core/res/res/values/havoc_config.xml
 +++ b/core/res/res/values/havoc_config.xml
 @@ -174,6 +174,13 @@
@@ -678,14 +678,16 @@ index a86b1a2abfd2..5647e796c35f 100644
      <!-- Component name of the combo network location provider. -->
      <string name="config_comboNetworkLocationProvider" translatable="false">@null</string>
  
-@@ -280,8 +287,4 @@
- 
+@@ -281,10 +288,6 @@
      <!-- Should we filter any display modes which are unampped? -->
      <bool name="config_filterDisplayModes">false</bool>
+ 
+-    <!-- Defines the sysfs attribute path used by pocket bridge
+-        to communicate pocket state to the pocket judge kernel driver. -->
+-    <string name="config_pocketBridgeSysfsInpocket"></string>
 -
--     <!-- Defines the sysfs attribute path used by pocket bridge
--         to communicate pocket state to the pocket judge kernel driver. -->
--     <string name="config_pocketBridgeSysfsInpocket"></string>
+     <!-- Smart charging battery percentage -->
+     <integer name="config_smartChargingBatteryLevel">80</integer>
  </resources>
 diff --git a/core/res/res/values/havoc_strings.xml b/core/res/res/values/havoc_strings.xml
 index acbe57ba1a1d..5e0bb3419364 100644
@@ -700,7 +702,7 @@ index acbe57ba1a1d..5e0bb3419364 100644
 -    <string name="pocket_lock_message_long_press">Press and hold power button to unlock</string> 
  </resources>
 diff --git a/core/res/res/values/havoc_symbols.xml b/core/res/res/values/havoc_symbols.xml
-index cbd69b24955f..083a76f267e9 100644
+index 8c9570538dcc..12fcb5fbe731 100644
 --- a/core/res/res/values/havoc_symbols.xml
 +++ b/core/res/res/values/havoc_symbols.xml
 @@ -191,6 +191,15 @@
@@ -719,11 +721,10 @@ index cbd69b24955f..083a76f267e9 100644
    <java-symbol type="string" name="config_comboNetworkLocationProvider" />
  
    <!-- Weather icons -->
-@@ -375,13 +384,4 @@
-   <java-symbol type="bool" name="config_defaultCABC" />
+@@ -376,15 +385,6 @@
    <java-symbol type="bool" name="config_filterDisplayModes" />
    <java-symbol type="array" name="config_displayModeMappings" />
--
+ 
 -  <!-- Pocket Lock -->
 -  <java-symbol type="layout" name="pocket_lock_view_layout" />
 -  <java-symbol type="id" name="pocket_hint_container" />
@@ -732,6 +733,9 @@ index cbd69b24955f..083a76f267e9 100644
 -
 -  <!-- Pocket bridge -->
 -  <java-symbol type="string" name="config_pocketBridgeSysfsInpocket" />
+-
+   <!-- Smart charging battery percentage -->
+   <java-symbol type="integer" name="config_smartChargingBatteryLevel" />
  </resources>
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardHostView.java b/packages/SystemUI/src/com/android/keyguard/KeyguardHostView.java
 index 6fa523371ebc..d1aaa341b6d9 100644
@@ -750,7 +754,7 @@ index 6fa523371ebc..d1aaa341b6d9 100644
              }
          }
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
-index 981518bc12b3..a13243f8c1d9 100644
+index 0dab080037de..a13243f8c1d9 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 +++ b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 @@ -64,8 +64,6 @@ import android.os.ServiceManager;
@@ -816,15 +820,6 @@ index 981518bc12b3..a13243f8c1d9 100644
          if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
              mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
          }
-@@ -1386,7 +1351,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
-                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
-                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
-                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
--                && !mKeyguardGoingAway && !mIsDeviceInPocket;
-+                && !mKeyguardGoingAway;
-     }
- 
-     private void startListeningForFingerprint() {
 diff --git a/services/core/java/com/android/server/pocket/PocketBridgeService.java b/services/core/java/com/android/server/pocket/PocketBridgeService.java
 deleted file mode 100644
 index f57bf0540362..000000000000
@@ -1797,7 +1792,7 @@ index aa23da053a17..dfbc2c73d400 100644
 -    }
  }
 diff --git a/services/core/java/com/android/server/policy/PhoneWindowManager.java b/services/core/java/com/android/server/policy/PhoneWindowManager.java
-index 26cfd370b110..edf971a8fa42 100644
+index ce4708dd0944..0f70069f99bc 100644
 --- a/services/core/java/com/android/server/policy/PhoneWindowManager.java
 +++ b/services/core/java/com/android/server/policy/PhoneWindowManager.java
 @@ -236,8 +236,6 @@ import android.os.UEventObserver;
@@ -1959,7 +1954,7 @@ index 26cfd370b110..edf971a8fa42 100644
          }
      }
  
-@@ -2172,9 +2128,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -2168,9 +2124,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          if ((mTorchActionMode == 2) && (!isScreenOn() || isDozeMode())) {
              return LONG_PRESS_POWER_TORCH;
          }
@@ -1969,7 +1964,7 @@ index 26cfd370b110..edf971a8fa42 100644
          return mLongPressOnPowerBehavior;
      }
  
-@@ -2329,11 +2282,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -2325,11 +2278,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              } else {
                  Slog.d(TAG, "ScreenShot Shortcut Disabled");
  	        }
@@ -1981,7 +1976,7 @@ index 26cfd370b110..edf971a8fa42 100644
          }
      }
  
-@@ -2651,9 +2599,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -2655,9 +2603,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          mOPGestures = new OPGesturesListener(context, new OPGesturesListener.Callbacks() {
              @Override
              public void onSwipeThreeFinger() {
@@ -1991,7 +1986,7 @@ index 26cfd370b110..edf971a8fa42 100644
              }
          });
  
-@@ -7316,23 +7262,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -7332,23 +7278,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              return 0;
          }
  
@@ -2015,7 +2010,7 @@ index 26cfd370b110..edf971a8fa42 100644
          // Basic policy based on interactive state.
          final boolean isVolumeRockerWake = !isScreenOn()
                  && mVolumeRockerWake
-@@ -7381,7 +7310,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -7397,7 +7326,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          if (isValidGlobalKey(keyCode)
                  && mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
              if (isWakeKey) {
@@ -2025,7 +2020,7 @@ index 26cfd370b110..edf971a8fa42 100644
              }
              return result;
          }
-@@ -7826,7 +7756,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -7842,7 +7772,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          }
  
          if (isWakeKey) {
@@ -2035,7 +2030,7 @@ index 26cfd370b110..edf971a8fa42 100644
          }
  
          return result;
-@@ -8251,9 +8182,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -8267,9 +8198,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          if (mKeyguardDelegate != null) {
              mKeyguardDelegate.onStartedGoingToSleep(why);
          }
@@ -2045,7 +2040,7 @@ index 26cfd370b110..edf971a8fa42 100644
      }
  
      // Called on the PowerManager's Notifier thread.
-@@ -8302,10 +8230,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -8318,10 +8246,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          if (mKeyguardDelegate != null) {
              mKeyguardDelegate.onStartedWakingUp();
          }
@@ -2056,7 +2051,7 @@ index 26cfd370b110..edf971a8fa42 100644
      }
  
      // Called on the PowerManager's Notifier thread.
-@@ -8319,10 +8243,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -8335,10 +8259,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      }
  
      private void wakeUpFromPowerKey(long eventTime) {
@@ -2073,7 +2068,7 @@ index 26cfd370b110..edf971a8fa42 100644
          final boolean theaterModeEnabled = isTheaterModeEnabled();
          if (!wakeInTheaterMode && theaterModeEnabled) {
              return false;
-@@ -8333,7 +8262,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -8349,7 +8278,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                      Settings.Global.THEATER_MODE_ON, 0);
          }
  
@@ -2086,7 +2081,7 @@ index 26cfd370b110..edf971a8fa42 100644
          return true;
      }
  
-@@ -8507,73 +8440,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -8523,73 +8456,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          toggleOrientationListener(true);
      }
  
@@ -2160,7 +2155,7 @@ index 26cfd370b110..edf971a8fa42 100644
      private void handleHideBootMessage() {
          synchronized (mLock) {
              if (!mKeyguardDrawnOnce) {
-@@ -9151,10 +9017,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+@@ -9167,10 +9033,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          // So it is better not to bind keyguard here.
          mKeyguardDelegate.onSystemReady();
  
@@ -2368,7 +2363,7 @@ index a432d7cce428..000000000000
 -
 -}
 diff --git a/services/core/java/com/android/server/power/PowerManagerService.java b/services/core/java/com/android/server/power/PowerManagerService.java
-index a038b8dc5c17..81c601ef377c 100755
+index 5ced6692194d..f9e8e1ca8a99 100755
 --- a/services/core/java/com/android/server/power/PowerManagerService.java
 +++ b/services/core/java/com/android/server/power/PowerManagerService.java
 @@ -34,6 +34,9 @@ import android.content.IntentFilter;
@@ -2381,7 +2376,7 @@ index a038b8dc5c17..81c601ef377c 100755
  import android.hardware.SensorManager;
  import android.hardware.SystemSensorManager;
  import android.hardware.display.DisplayManagerInternal;
-@@ -70,6 +73,7 @@ import android.provider.Settings.SettingNotFoundException;
+@@ -71,6 +74,7 @@ import android.provider.Settings.SettingNotFoundException;
  import android.service.dreams.DreamManagerInternal;
  import android.service.vr.IVrManager;
  import android.service.vr.IVrStateCallbacks;
@@ -2389,7 +2384,7 @@ index a038b8dc5c17..81c601ef377c 100755
  import android.util.KeyValueListParser;
  import android.util.PrintWriterPrinter;
  import android.util.Slog;
-@@ -135,6 +139,7 @@ public final class PowerManagerService extends SystemService
+@@ -137,6 +141,7 @@ public final class PowerManagerService extends SystemService
      private static final int MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT = 3;
      // Message: Polling to look for long held wake locks.
      private static final int MSG_CHECK_FOR_LONG_WAKELOCKS = 4;
@@ -2397,16 +2392,15 @@ index a038b8dc5c17..81c601ef377c 100755
  
      // Dirty bit: mWakeLocks changed
      protected static final int DIRTY_WAKE_LOCKS = 1 << 0;
-@@ -232,6 +237,8 @@ public final class PowerManagerService extends SystemService
-     // Persistent property for last reboot reason
-     private static final String LAST_REBOOT_PROPERTY = "persist.sys.boot.reason";
- 
+@@ -238,6 +243,7 @@ public final class PowerManagerService extends SystemService
+     private static final String BATTERY_CHARGER_PATH =
+             "/sys/class/power_supply/battery/battery_charging_enabled";
+     private static final String CHARGER_PATH = "/sys/class/power_supply/battery/charging_enabled";
 +    private static final float PROXIMITY_NEAR_THRESHOLD = 5.0f;
-+
+ 
      private final Context mContext;
      private final ServiceThread mHandlerThread;
-     private final Thread mWaitMpctlThread;
-@@ -692,7 +699,17 @@ public final class PowerManagerService extends SystemService
+@@ -709,7 +715,17 @@ public final class PowerManagerService extends SystemService
      private static native void nativeSendPowerHint(int hintId, int data);
      private static native void nativeSetFeature(int featureId, int data);
  
@@ -2424,7 +2418,7 @@ index a038b8dc5c17..81c601ef377c 100755
  
      public PowerManagerService(Context context) {
          super(context);
-@@ -926,6 +943,10 @@ public final class PowerManagerService extends SystemService
+@@ -943,6 +959,10 @@ public final class PowerManagerService extends SystemService
                  // Shouldn't happen since in-process.
              }
  
@@ -2435,7 +2429,7 @@ index a038b8dc5c17..81c601ef377c 100755
              // Go.
              readConfigurationLocked();
              updateSettingsLocked();
-@@ -997,6 +1018,9 @@ public final class PowerManagerService extends SystemService
+@@ -1014,6 +1034,9 @@ public final class PowerManagerService extends SystemService
          resolver.registerContentObserver(Settings.System.getUriFor(
                  Settings.System.WAKELOCK_BLOCKING_LIST),
                  false, mSettingsObserver, UserHandle.USER_ALL);
@@ -2445,10 +2439,10 @@ index a038b8dc5c17..81c601ef377c 100755
          resolver.registerContentObserver(Settings.System.getUriFor(
                  Settings.System.DOZE_ON_CHARGE_NOW),
                  false, mSettingsObserver, UserHandle.USER_ALL);
-@@ -1072,6 +1096,16 @@ public final class PowerManagerService extends SystemService
-                 com.android.internal.R.fraction.config_maximumScreenDimRatio, 1, 1);
-         mSupportsDoubleTapWakeConfig = resources.getBoolean(
+@@ -1097,6 +1120,16 @@ public final class PowerManagerService extends SystemService
                  com.android.internal.R.bool.config_supportDoubleTapWake);
+         mSmartChargingLevelDefaultConfig = resources.getInteger(
+                 com.android.internal.R.integer.config_smartChargingBatteryLevel);
 +        mProximityTimeOut = resources.getInteger(
 +                com.android.internal.R.integer.config_proximityCheckTimeout);
 +        mProximityWakeSupported = resources.getBoolean(
@@ -2462,7 +2456,7 @@ index a038b8dc5c17..81c601ef377c 100755
      }
  
      private void updateSettingsLocked() {
-@@ -1149,6 +1183,11 @@ public final class PowerManagerService extends SystemService
+@@ -1179,6 +1212,11 @@ public final class PowerManagerService extends SystemService
                  Settings.Secure.HARDWARE_KEYS_DISABLE, 0,
                  UserHandle.USER_CURRENT) != 0;
  
@@ -2474,7 +2468,7 @@ index a038b8dc5c17..81c601ef377c 100755
          mDirty |= DIRTY_SETTINGS;
      }
  
-@@ -4178,6 +4217,10 @@ public final class PowerManagerService extends SystemService
+@@ -4243,6 +4281,10 @@ public final class PowerManagerService extends SystemService
                  case MSG_CHECK_FOR_LONG_WAKELOCKS:
                      checkForLongWakeLocks();
                      break;
@@ -2485,7 +2479,7 @@ index a038b8dc5c17..81c601ef377c 100755
              }
          }
      }
-@@ -4620,6 +4663,19 @@ public final class PowerManagerService extends SystemService
+@@ -4685,6 +4727,19 @@ public final class PowerManagerService extends SystemService
  
          @Override // Binder call
          public void wakeUp(long eventTime, String reason, String opPackageName) {
@@ -2505,7 +2499,7 @@ index a038b8dc5c17..81c601ef377c 100755
              if (eventTime > SystemClock.uptimeMillis()) {
                  throw new IllegalArgumentException("event time must not be in the future");
              }
-@@ -4628,11 +4684,21 @@ public final class PowerManagerService extends SystemService
+@@ -4693,11 +4748,21 @@ public final class PowerManagerService extends SystemService
                      android.Manifest.permission.DEVICE_POWER, null);
  
              final int uid = Binder.getCallingUid();
@@ -2532,7 +2526,7 @@ index a038b8dc5c17..81c601ef377c 100755
              }
          }
  
-@@ -5136,4 +5202,76 @@ public final class PowerManagerService extends SystemService
+@@ -5201,4 +5266,76 @@ public final class PowerManagerService extends SystemService
              powerHintInternal(hintId, data);
          }
      }

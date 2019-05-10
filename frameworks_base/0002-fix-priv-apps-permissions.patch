@@ -1,4 +1,4 @@
-From d07d043add6e7abdff8d6eac766539de7ce57f37 Mon Sep 17 00:00:00 2001
+From 2221c8157c24578b6464903638de86be030f7017 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Sat, 10 Nov 2018 18:16:14 +0300
 Subject: [PATCH 02/12] fix priv-apps permissions
