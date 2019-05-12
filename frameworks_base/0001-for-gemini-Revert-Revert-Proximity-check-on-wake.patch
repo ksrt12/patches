@@ -1,7 +1,19 @@
-From ff1d2b1c66d92211026a0c82bfc30aed05ffc76e Mon Sep 17 00:00:00 2001
+From e76783eccc5148a5e7f94de989f4418ae4e12373 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
-Date: Thu, 9 May 2019 10:20:40 +0300
+Date: Mon, 13 May 2019 01:48:51 +0300
 Subject: [PATCH 01/12] for gemini: Revert "Revert "Proximity check on wake""
+
+Revert "pocket: Use MD2 lock drawable"
+
+This reverts commit 51c0360146737491405420802614ba1207eeaa9c.
+
+Revert "base: Make FP detection in pocket mode configurable [1/2]"
+
+This reverts commit 715da0ca193f26b33ef5fe0f88ed8da98a8e5944.
+
+Revert "pocket: Allow to listen for fingerprint"
+
+This reverts commit 910f16a6dc03de36c740ee34263245d238556e04.
 
 Revert "Pocket lock improvements"
 
@@ -55,13 +67,15 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  core/java/android/pocket/IPocketService.aidl  |  43 -
  core/java/android/pocket/PocketConstants.java |  25 -
  core/java/android/pocket/PocketManager.java   | 233 ------
- core/java/android/provider/Settings.java      |  28 +-
+ core/java/android/provider/Settings.java      |  33 +-
+ core/res/res/drawable/ic_pocket_lock.xml      |  10 -
  .../res/layout/pocket_lock_view_layout.xml    |  42 -
  core/res/res/values/havoc_config.xml          |  11 +-
  core/res/res/values/havoc_strings.xml         |   3 -
  core/res/res/values/havoc_symbols.xml         |  18 +-
  .../android/keyguard/KeyguardHostView.java    |   5 +-
- .../keyguard/KeyguardUpdateMonitor.java       |  35 -
+ .../keyguard/KeyguardUpdateMonitor.java       |  56 +-
+ .../systemui/statusbar/phone/StatusBar.java   |  14 -
  .../server/pocket/PocketBridgeService.java    | 177 -----
  .../android/server/pocket/PocketService.java  | 751 ------------------
  .../policy/ImmersiveModeConfirmation.java     |   8 +-
@@ -69,11 +83,12 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  .../server/policy/pocket/PocketLock.java      | 190 -----
  .../server/power/PowerManagerService.java     | 147 +++-
  .../java/com/android/server/SystemServer.java |  12 -
- 24 files changed, 231 insertions(+), 1779 deletions(-)
+ 26 files changed, 236 insertions(+), 1824 deletions(-)
  delete mode 100644 core/java/android/pocket/IPocketCallback.aidl
  delete mode 100644 core/java/android/pocket/IPocketService.aidl
  delete mode 100644 core/java/android/pocket/PocketConstants.java
  delete mode 100644 core/java/android/pocket/PocketManager.java
+ delete mode 100644 core/res/res/drawable/ic_pocket_lock.xml
  delete mode 100644 core/res/res/layout/pocket_lock_view_layout.xml
  delete mode 100644 services/core/java/com/android/server/pocket/PocketBridgeService.java
  delete mode 100644 services/core/java/com/android/server/pocket/PocketService.java
@@ -546,7 +561,7 @@ index 925f52a961ab..000000000000
 -
 -}
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index 15af3a940cd3..76a50d4782a0 100644
+index 56ea7634bc7d..76a50d4782a0 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
 @@ -4063,6 +4063,12 @@ public final class Settings {
@@ -577,7 +592,7 @@ index 15af3a940cd3..76a50d4782a0 100644
          /**
           * Whether to disable showing arrows in network traffic indicators
           * @hide
-@@ -6623,18 +6637,6 @@ public final class Settings {
+@@ -6623,23 +6637,6 @@ public final class Settings {
          public static final Validator LIVE_DISPLAY_HINTED_VALIDATOR =
                  new SettingsValidators.InclusiveIntegerRangeValidator(-3, 1);
  
@@ -593,10 +608,15 @@ index 15af3a940cd3..76a50d4782a0 100644
 -        /** @hide */
 -        public static final Validator POCKET_JUDGE_VALIDATOR = BOOLEAN_VALIDATOR;
 -
+-        /**
+-         * @hide
+-         */
+-        public static final String POCKET_JUDGE_ALLOW_FP = "pocket_judge_allow_fp";
+-
          /**
           * @hide
           */
-@@ -7007,7 +7009,6 @@ public final class Settings {
+@@ -7012,7 +7009,6 @@ public final class Settings {
              PRIVATE_SETTINGS.add(DISPLAY_COLOR_ADJUSTMENT);
              PRIVATE_SETTINGS.add(DISPLAY_PICTURE_ADJUSTMENT);
              PRIVATE_SETTINGS.add(LIVE_DISPLAY_HINTED);
@@ -604,7 +624,7 @@ index 15af3a940cd3..76a50d4782a0 100644
          }
  
          /**
-@@ -7199,7 +7200,6 @@ public final class Settings {
+@@ -7204,7 +7200,6 @@ public final class Settings {
              VALIDATORS.put(DISPLAY_COLOR_ADJUSTMENT, DISPLAY_COLOR_ADJUSTMENT_VALIDATOR);
              VALIDATORS.put(DISPLAY_PICTURE_ADJUSTMENT, DISPLAY_PICTURE_ADJUSTMENT_VALIDATOR);
              VALIDATORS.put(LIVE_DISPLAY_HINTED, LIVE_DISPLAY_HINTED_VALIDATOR);
@@ -612,9 +632,25 @@ index 15af3a940cd3..76a50d4782a0 100644
          }
  
          /**
+diff --git a/core/res/res/drawable/ic_pocket_lock.xml b/core/res/res/drawable/ic_pocket_lock.xml
+deleted file mode 100644
+index 3494a8f38b84..000000000000
+--- a/core/res/res/drawable/ic_pocket_lock.xml
++++ /dev/null
+@@ -1,10 +0,0 @@
+-<vector xmlns:android="http://schemas.android.com/apk/res/android"
+-        android:width="24dp"
+-        android:height="24dp"
+-        android:viewportWidth="24.0"
+-        android:viewportHeight="24.0"
+-        android:tint="?android:attr/colorControlActivated">
+-    <path
+-        android:fillColor="#ffffffff"
+-        android:pathData="M12,17C10.89,17 10,16.1 10,15C10,13.89 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,20V10H6V20H18M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10C4,8.89 4.89,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+-</vector>
 diff --git a/core/res/res/layout/pocket_lock_view_layout.xml b/core/res/res/layout/pocket_lock_view_layout.xml
 deleted file mode 100644
-index 2eca671011d4..000000000000
+index 0e0ea3fd7cfd..000000000000
 --- a/core/res/res/layout/pocket_lock_view_layout.xml
 +++ /dev/null
 @@ -1,42 +0,0 @@
@@ -641,7 +677,7 @@ index 2eca671011d4..000000000000
 -            android:layout_gravity="center_horizontal"
 -            android:gravity="center_horizontal"
 -            android:padding="10dp"
--            android:src="@android:drawable/ic_lock_lock"
+-            android:src="@android:drawable/ic_pocket_lock"
 -            android:tint="@android:color/white"
 -            android:alpha="1.0"/>
 -
@@ -754,7 +790,7 @@ index 6fa523371ebc..d1aaa341b6d9 100644
              }
          }
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
-index 0dab080037de..a13243f8c1d9 100644
+index 6b065f1f58d1..a13243f8c1d9 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 +++ b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 @@ -64,8 +64,6 @@ import android.os.ServiceManager;
@@ -766,7 +802,15 @@ index 0dab080037de..a13243f8c1d9 100644
  import android.provider.Settings;
  import android.service.dreams.DreamService;
  import android.service.dreams.IDreamManager;
-@@ -264,31 +262,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+@@ -248,7 +246,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+     private boolean mIsDreaming;
+     private final DevicePolicyManager mDevicePolicyManager;
+     private boolean mLogoutEnabled;
+-    private boolean mPocketJudgeAllowFP;
+ 
+     /**
+      * Short delay before restarting fingerprint authentication after a successful try
+@@ -265,31 +262,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
      // For face unlock identification
      private String lastBroadcastActionReceived;
  
@@ -798,7 +842,7 @@ index 0dab080037de..a13243f8c1d9 100644
      private final Handler mHandler = new Handler(Looper.getMainLooper()) {
          @Override
          public void handleMessage(Message msg) {
-@@ -387,9 +360,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+@@ -388,9 +360,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
                  case MSG_TELEPHONY_CAPABLE:
                      updateTelephonyCapable((boolean)msg.obj);
                      break;
@@ -808,7 +852,7 @@ index 0dab080037de..a13243f8c1d9 100644
                  default:
                      super.handleMessage(msg);
                      break;
-@@ -1329,11 +1299,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+@@ -1330,11 +1299,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
          mDreamManager = IDreamManager.Stub.asInterface(
                  ServiceManager.getService(DreamService.DREAM_SERVICE));
  
@@ -820,6 +864,86 @@ index 0dab080037de..a13243f8c1d9 100644
          if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
              mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
          }
+@@ -1383,21 +1347,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+     }
+ 
+     private boolean shouldListenForFingerprint() {
+-        mPocketJudgeAllowFP = Settings.System.getIntForUser(mContext.getContentResolver(),
+-                Settings.System.POCKET_JUDGE_ALLOW_FP, 0, UserHandle.USER_CURRENT) == 1;
+-        if (!mPocketJudgeAllowFP) {
+-            return (mKeyguardIsVisible || !mDeviceInteractive ||
+-                    (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
+-                    shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
+-                    && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
+-                    && !mKeyguardGoingAway && !mIsDeviceInPocket;
+-        } else {
+-            return (mKeyguardIsVisible || !mDeviceInteractive ||
+-                    (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
+-                    shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
+-                    && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
+-                    && !mKeyguardGoingAway;
+-        }
++        return (mKeyguardIsVisible || !mDeviceInteractive ||
++                (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
++                shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
++                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
++                && !mKeyguardGoingAway;
+     }
+ 
+     private void startListeningForFingerprint() {
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
+index b638592ae06b..7cd9d1445d16 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
+@@ -685,8 +685,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+ 
+     private boolean mWallpaperSupportsAmbientMode;
+ 
+-    private boolean mPocketJudgeAllowFP;
+-
+     private BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
+         @Override
+         public void onReceive(Context context, Intent intent) {
+@@ -5746,9 +5744,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+             resolver.registerContentObserver(Settings.System.getUriFor(
+                   Settings.System.LOCKSCREEN_ALBUM_ART_FILTER),
+                   false, this, UserHandle.USER_ALL);
+-            resolver.registerContentObserver(Settings.System.getUriFor(
+-                    Settings.System.POCKET_JUDGE_ALLOW_FP),
+-                    false, this, UserHandle.USER_ALL);
+ 	    }
+ 
+         @Override
+@@ -5853,9 +5848,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+             } else if (uri.equals(Settings.System.getUriFor(
+                     Settings.System.USE_OLD_MOBILETYPE))) {
+                 updateTelephonyIcons();
+-            } else if (uri.equals(Settings.System.getUriFor(
+-                    Settings.System.POCKET_JUDGE_ALLOW_FP))) {
+-                updatePocketJudgeFP();
+             }
+         }
+ 
+@@ -5878,7 +5870,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+             updateKeyguardStatusBarSettings();
+             updateLockscreenFilter();
+             updateTelephonyIcons();
+-            updatePocketJudgeFP();
+         }
+     }
+ 
+@@ -6034,11 +6025,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+         TelephonyIcons.updateIcons(USE_OLD_MOBILETYPE);
+     }
+ 
+-    private void updatePocketJudgeFP() {
+-        mPocketJudgeAllowFP = Settings.System.getIntForUser(mContext.getContentResolver(),
+-                Settings.System.POCKET_JUDGE_ALLOW_FP, 0, UserHandle.USER_CURRENT) == 1;
+-    }
+-
+     public int getWakefulnessState() {
+         return mWakefulnessLifecycle.getWakefulness();
+     }
 diff --git a/services/core/java/com/android/server/pocket/PocketBridgeService.java b/services/core/java/com/android/server/pocket/PocketBridgeService.java
 deleted file mode 100644
 index f57bf0540362..000000000000

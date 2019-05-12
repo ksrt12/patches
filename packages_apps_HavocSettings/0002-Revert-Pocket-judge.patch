@@ -1,7 +1,7 @@
-From ebeccf3bd46a8a2fd8642f46b6c5822f1749c834 Mon Sep 17 00:00:00 2001
+From 64e59d21055ff62b250f44b1133c29ffc6a0db95 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Thu, 9 May 2019 10:29:32 +0300
-Subject: [PATCH] Revert "Pocket judge"
+Subject: [PATCH 2/4] Revert "Pocket judge"
 
 This reverts commit 4845d7b1883403e5fcd0d24c1424b6e94fe3a7d2.
 ---
@@ -11,10 +11,10 @@ This reverts commit 4845d7b1883403e5fcd0d24c1424b6e94fe3a7d2.
  3 files changed, 5 insertions(+), 15 deletions(-)
 
 diff --git a/res/values/havoc_strings.xml b/res/values/havoc_strings.xml
-index 06754f2..73393fb 100644
+index 03d7e05..c94dcb5 100644
 --- a/res/values/havoc_strings.xml
 +++ b/res/values/havoc_strings.xml
-@@ -1659,10 +1659,6 @@
+@@ -1666,10 +1666,6 @@
      <string name="lockscreen_solid_fudge_factor_title">Sanity level</string>
      <string name="lockscreen_solid_units_opacity_title">Lines opacity</string>
  

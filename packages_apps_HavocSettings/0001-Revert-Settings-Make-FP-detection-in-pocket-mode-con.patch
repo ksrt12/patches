@@ -1,0 +1,65 @@
+From 555d04eec4d43b5ccd296181fc114e5612951f4a Mon Sep 17 00:00:00 2001
+From: Kazakov Stepan <ksrt12group@gmail.com>
+Date: Mon, 13 May 2019 00:26:37 +0300
+Subject: [PATCH 1/4] Revert "Settings: : Make FP detection in pocket mode
+ configurable [2/2]"
+
+This reverts commit eda9d3db2f4fd7cbcbbe4f3c29a0d51bdab3e41a.
+---
+ res/values/havoc_strings.xml          |  2 --
+ res/xml/havoc_settings_lockscreen.xml | 19 ++++++-------------
+ 2 files changed, 6 insertions(+), 15 deletions(-)
+
+diff --git a/res/values/havoc_strings.xml b/res/values/havoc_strings.xml
+index 36c5665..03d7e05 100644
+--- a/res/values/havoc_strings.xml
++++ b/res/values/havoc_strings.xml
+@@ -1669,8 +1669,6 @@
+     <!-- Pocket judge -->
+     <string name="pocket_judge_title">Pocket detection</string>
+     <string name="pocket_judge_summary">Block screen and button inputs when device is in pocket</string>
+-    <string name="pocket_judge_fp_title">Allow FP in pocket mode</string>
+-    <string name="pocket_judge_fp_summary">Listen for fingerprint when pocket detection is active</string>
+ 
+     <!-- Notch: Full screen apps -->
+     <string name="display_cutout_force_fullscreen_title">Full screen apps</string>
+diff --git a/res/xml/havoc_settings_lockscreen.xml b/res/xml/havoc_settings_lockscreen.xml
+index 9f3bf78..e745308 100644
+--- a/res/xml/havoc_settings_lockscreen.xml
++++ b/res/xml/havoc_settings_lockscreen.xml
+@@ -96,19 +96,6 @@
+         android:key="ls_unlocking"
+         android:title="@string/ls_unlocking">
+ 
+-        <com.havoc.support.preferences.SystemSettingSwitchPreference
+-            android:key="pocket_judge"
+-            android:title="@string/pocket_judge_title"
+-            android:summary="@string/pocket_judge_summary"
+-            android:defaultValue="false" />
+-
+-        <com.havoc.support.preferences.SystemSettingSwitchPreference
+-            android:key="pocket_judge_allow_fp"
+-            android:title="@string/pocket_judge_fp_title"
+-            android:summary="@string/pocket_judge_fp_summary"
+-            android:defaultValue="false"
+-            android:dependency="pocket_judge" />
+-
+         <SwitchPreference
+             android:key="fingerprint_success_vib"
+             android:title="@string/fprint_sucess_vib_title"
+@@ -121,6 +108,12 @@
+             android:summary="@string/fp_unlock_keystore_summary" 
+             android:defaultValue="false" /> 
+ 
++        <com.havoc.support.preferences.SystemSettingSwitchPreference
++            android:key="pocket_judge" 
++            android:title="@string/pocket_judge_title" 
++            android:summary="@string/pocket_judge_summary" 
++            android:defaultValue="false" />	
++
+         <com.havoc.support.preferences.SecureSettingSwitchPreference
+             android:key="face_auto_unlock"
+             android:title="@string/face_auto_unlock_title"
+-- 
+2.20.1
+
