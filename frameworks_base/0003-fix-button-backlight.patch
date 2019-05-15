@@ -1,4 +1,4 @@
-From 834fabd624997fec3059730c16a23ead9b72f327 Mon Sep 17 00:00:00 2001
+From 79107055ad297e39552a5298108835b8696cceb3 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Mon, 3 Dec 2018 00:03:51 +0300
 Subject: [PATCH 03/12] fix button backlight
@@ -87,7 +87,7 @@ index d4e7ca13a7f9..2cb5aeeeb2e6 100644
       * Used by the window manager to override the user activity timeout based on the
       * current foreground activity.  It can only be used to make the timeout shorter
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index 76a50d4782a0..9bd411512632 100644
+index db08b47c5575..6698b4ac22a4 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
 @@ -3324,26 +3324,6 @@ public final class Settings {
@@ -156,7 +156,7 @@ index 76a50d4782a0..9bd411512632 100644
          /** 
           * Screen stabilization parameters
           * @hide
-@@ -6941,6 +6953,11 @@ public final class Settings {
+@@ -6946,6 +6958,11 @@ public final class Settings {
              PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_STATE);
              PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_TYPE);
              PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD);
@@ -193,7 +193,7 @@ index 1877befd95d0..8cfdee27dccf 100644
      <bool name="config_oldQtiTelephony">true</bool>
  
 diff --git a/core/res/res/values/havoc_symbols.xml b/core/res/res/values/havoc_symbols.xml
-index 12fcb5fbe731..9eb993e2fcba 100644
+index 2e54b0c47d48..6a76c02fc643 100644
 --- a/core/res/res/values/havoc_symbols.xml
 +++ b/core/res/res/values/havoc_symbols.xml
 @@ -27,9 +27,6 @@

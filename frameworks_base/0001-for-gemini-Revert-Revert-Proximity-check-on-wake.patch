@@ -1,4 +1,4 @@
-From e76783eccc5148a5e7f94de989f4418ae4e12373 Mon Sep 17 00:00:00 2001
+From 657ed492a48d29e8b5f8ab5a6135791b530780d9 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Mon, 13 May 2019 01:48:51 +0300
 Subject: [PATCH 01/12] for gemini: Revert "Revert "Proximity check on wake""
@@ -561,7 +561,7 @@ index 925f52a961ab..000000000000
 -
 -}
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index 56ea7634bc7d..76a50d4782a0 100644
+index 1c260d45ba1e..db08b47c5575 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
 @@ -4063,6 +4063,12 @@ public final class Settings {
@@ -616,7 +616,7 @@ index 56ea7634bc7d..76a50d4782a0 100644
          /**
           * @hide
           */
-@@ -7012,7 +7009,6 @@ public final class Settings {
+@@ -7017,7 +7014,6 @@ public final class Settings {
              PRIVATE_SETTINGS.add(DISPLAY_COLOR_ADJUSTMENT);
              PRIVATE_SETTINGS.add(DISPLAY_PICTURE_ADJUSTMENT);
              PRIVATE_SETTINGS.add(LIVE_DISPLAY_HINTED);
@@ -624,7 +624,7 @@ index 56ea7634bc7d..76a50d4782a0 100644
          }
  
          /**
-@@ -7204,7 +7200,6 @@ public final class Settings {
+@@ -7209,7 +7205,6 @@ public final class Settings {
              VALIDATORS.put(DISPLAY_COLOR_ADJUSTMENT, DISPLAY_COLOR_ADJUSTMENT_VALIDATOR);
              VALIDATORS.put(DISPLAY_PICTURE_ADJUSTMENT, DISPLAY_PICTURE_ADJUSTMENT_VALIDATOR);
              VALIDATORS.put(LIVE_DISPLAY_HINTED, LIVE_DISPLAY_HINTED_VALIDATOR);
@@ -738,7 +738,7 @@ index acbe57ba1a1d..5e0bb3419364 100644
 -    <string name="pocket_lock_message_long_press">Press and hold power button to unlock</string> 
  </resources>
 diff --git a/core/res/res/values/havoc_symbols.xml b/core/res/res/values/havoc_symbols.xml
-index 8c9570538dcc..12fcb5fbe731 100644
+index 53665d938ba6..2e54b0c47d48 100644
 --- a/core/res/res/values/havoc_symbols.xml
 +++ b/core/res/res/values/havoc_symbols.xml
 @@ -191,6 +191,15 @@
@@ -772,7 +772,7 @@ index 8c9570538dcc..12fcb5fbe731 100644
 -
    <!-- Smart charging battery percentage -->
    <java-symbol type="integer" name="config_smartChargingBatteryLevel" />
- </resources>
+ 
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardHostView.java b/packages/SystemUI/src/com/android/keyguard/KeyguardHostView.java
 index 6fa523371ebc..d1aaa341b6d9 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardHostView.java
@@ -790,7 +790,7 @@ index 6fa523371ebc..d1aaa341b6d9 100644
              }
          }
 diff --git a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
-index 6b065f1f58d1..a13243f8c1d9 100644
+index 21dfba11bc9e..27e3f294463e 100644
 --- a/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 +++ b/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java
 @@ -64,8 +64,6 @@ import android.os.ServiceManager;
@@ -852,7 +852,7 @@ index 6b065f1f58d1..a13243f8c1d9 100644
                  default:
                      super.handleMessage(msg);
                      break;
-@@ -1330,11 +1299,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+@@ -1331,11 +1300,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
          mDreamManager = IDreamManager.Stub.asInterface(
                  ServiceManager.getService(DreamService.DREAM_SERVICE));
  
@@ -864,7 +864,7 @@ index 6b065f1f58d1..a13243f8c1d9 100644
          if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
              mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
          }
-@@ -1383,21 +1347,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
+@@ -1384,21 +1348,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener,
      }
  
      private boolean shouldListenForFingerprint() {
@@ -892,10 +892,10 @@ index 6b065f1f58d1..a13243f8c1d9 100644
  
      private void startListeningForFingerprint() {
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
-index b638592ae06b..7cd9d1445d16 100644
+index 06da082df876..3d5e2b6c8458 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
-@@ -685,8 +685,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -687,8 +687,6 @@ public class StatusBar extends SystemUI implements DemoMode,
  
      private boolean mWallpaperSupportsAmbientMode;
  
@@ -904,7 +904,7 @@ index b638592ae06b..7cd9d1445d16 100644
      private BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
          @Override
          public void onReceive(Context context, Intent intent) {
-@@ -5746,9 +5744,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -5778,9 +5776,6 @@ public class StatusBar extends SystemUI implements DemoMode,
              resolver.registerContentObserver(Settings.System.getUriFor(
                    Settings.System.LOCKSCREEN_ALBUM_ART_FILTER),
                    false, this, UserHandle.USER_ALL);
@@ -914,7 +914,7 @@ index b638592ae06b..7cd9d1445d16 100644
  	    }
  
          @Override
-@@ -5853,9 +5848,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -5885,9 +5880,6 @@ public class StatusBar extends SystemUI implements DemoMode,
              } else if (uri.equals(Settings.System.getUriFor(
                      Settings.System.USE_OLD_MOBILETYPE))) {
                  updateTelephonyIcons();
@@ -924,7 +924,7 @@ index b638592ae06b..7cd9d1445d16 100644
              }
          }
  
-@@ -5878,7 +5870,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -5910,7 +5902,6 @@ public class StatusBar extends SystemUI implements DemoMode,
              updateKeyguardStatusBarSettings();
              updateLockscreenFilter();
              updateTelephonyIcons();
@@ -932,7 +932,7 @@ index b638592ae06b..7cd9d1445d16 100644
          }
      }
  
-@@ -6034,11 +6025,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -6067,11 +6058,6 @@ public class StatusBar extends SystemUI implements DemoMode,
          TelephonyIcons.updateIcons(USE_OLD_MOBILETYPE);
      }
  

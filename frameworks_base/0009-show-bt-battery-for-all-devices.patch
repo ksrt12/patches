@@ -1,4 +1,4 @@
-From 239fe433e1ceadb7097f675f0468e764f1fc8778 Mon Sep 17 00:00:00 2001
+From 8e7e7c404ca4879ce562e16f0b711955f51d7741 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Sun, 17 Feb 2019 00:30:13 +0300
 Subject: [PATCH 09/12] show bt battery for all devices
