@@ -1,4 +1,4 @@
-From bec07279ef535552ee28d6f453f6a7ed459263df Mon Sep 17 00:00:00 2001
+From 351b653668947fa66df96b7aa806bb1bfd7648d6 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Tue, 22 Jan 2019 12:28:08 +0300
 Subject: [PATCH 06/12] toggle torch proximity check [1/2]

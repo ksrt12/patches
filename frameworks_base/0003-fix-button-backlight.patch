@@ -1,4 +1,4 @@
-From 79107055ad297e39552a5298108835b8696cceb3 Mon Sep 17 00:00:00 2001
+From dc92ca72b483e31ef2175ecc523ec74cba62bf8e Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Mon, 3 Dec 2018 00:03:51 +0300
 Subject: [PATCH 03/12] fix button backlight
@@ -12,8 +12,8 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  core/res/res/values/havoc_config.xml          |   6 +-
  core/res/res/values/havoc_symbols.xml         |   7 +-
  .../NotificationManagerService.java           |   2 +-
- .../server/power/PowerManagerService.java     | 313 +++++++++++-------
- 8 files changed, 246 insertions(+), 170 deletions(-)
+ .../server/power/PowerManagerService.java     | 318 +++++++++++-------
+ 8 files changed, 251 insertions(+), 170 deletions(-)
 
 diff --git a/core/java/android/os/IPowerManager.aidl b/core/java/android/os/IPowerManager.aidl
 index 626abe7d4875..4092863f62f8 100644
@@ -169,7 +169,7 @@ index db08b47c5575..6698b4ac22a4 100644
              PRIVATE_SETTINGS.add(VOLUME_KEYS_CONTROL_RING_TONE);
              PRIVATE_SETTINGS.add(THEMING_SETTINGS_DASHBOARD_ICONS);
 diff --git a/core/res/res/values/havoc_config.xml b/core/res/res/values/havoc_config.xml
-index 1877befd95d0..8cfdee27dccf 100644
+index 0abe5f249598..171d04204580 100644
 --- a/core/res/res/values/havoc_config.xml
 +++ b/core/res/res/values/havoc_config.xml
 @@ -40,9 +40,6 @@
@@ -193,7 +193,7 @@ index 1877befd95d0..8cfdee27dccf 100644
      <bool name="config_oldQtiTelephony">true</bool>
  
 diff --git a/core/res/res/values/havoc_symbols.xml b/core/res/res/values/havoc_symbols.xml
-index 2e54b0c47d48..6a76c02fc643 100644
+index f2b2b433c598..dfa9eafc7576 100644
 --- a/core/res/res/values/havoc_symbols.xml
 +++ b/core/res/res/values/havoc_symbols.xml
 @@ -27,9 +27,6 @@
@@ -231,7 +231,7 @@ index aa755811e37c..aa86dd933a11 100644
                      mNotificationPulseEnabled = pulseEnabled;
                      updateNotificationPulse();
 diff --git a/services/core/java/com/android/server/power/PowerManagerService.java b/services/core/java/com/android/server/power/PowerManagerService.java
-index f9e8e1ca8a99..c92e13572ed8 100755
+index a5257b9ff697..82f5819fc779 100755
 --- a/services/core/java/com/android/server/power/PowerManagerService.java
 +++ b/services/core/java/com/android/server/power/PowerManagerService.java
 @@ -143,6 +143,8 @@ public final class PowerManagerService extends SystemService
@@ -252,7 +252,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
      // Default setting for double tap to wake.
      private static final int DEFAULT_DOUBLE_TAP_TO_WAKE = 0;
  
-@@ -268,13 +268,6 @@ public final class PowerManagerService extends SystemService
+@@ -263,13 +263,6 @@ public final class PowerManagerService extends SystemService
      private Light mAttentionLight;
      private Light mButtonsLight;
  
@@ -266,7 +266,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
      private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_POWER);
  
      // A bitfield that indicates what parts of the power state have
-@@ -522,11 +515,6 @@ public final class PowerManagerService extends SystemService
+@@ -517,11 +510,6 @@ public final class PowerManagerService extends SystemService
      // Set to -1 when not told the user is inactive since the last period spent dozing or asleep.
      private long mOverriddenTimeout = -1;
  
@@ -278,7 +278,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
      // The user activity timeout override from the window manager
      // to allow the current foreground activity to override the user activity timeout.
      // Use -1 to disable.
-@@ -553,12 +541,6 @@ public final class PowerManagerService extends SystemService
+@@ -548,12 +536,6 @@ public final class PowerManagerService extends SystemService
      // True if we are currently in light device idle mode.
      private boolean mLightDeviceIdleMode;
  
@@ -291,10 +291,15 @@ index f9e8e1ca8a99..c92e13572ed8 100755
      // Set of app ids that we will always respect the wake locks for.
      int[] mDeviceIdleWhitelist = new int[0];
  
-@@ -639,6 +621,23 @@ public final class PowerManagerService extends SystemService
-     // Handle battery charging, when false the charger will keep the
-     // battery at the current level
-     private boolean mChargeBattery = true;
+@@ -633,6 +615,28 @@ public final class PowerManagerService extends SystemService
+     private static String mPowerInputSupsendSysfsNode;
+     private static String mPowerInputSupsendValue;
+     private static String mPowerInputResumeValue;
++    // Handle charger
++    private boolean mUseCharger = true;
++    // Handle battery charging, when false the charger will keep the
++    // battery at the current level
++    private boolean mChargeBattery = true;
 +    // button brightness suppport enablement
 +    private boolean mButtonBrightnessSupport = false;
 +    private int mCurrentButtonBrightness = 0;
@@ -315,7 +320,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
  
      /**
       * All times are in milliseconds. These constants are kept synchronized with the system
-@@ -927,7 +926,6 @@ public final class PowerManagerService extends SystemService
+@@ -922,7 +926,6 @@ public final class PowerManagerService extends SystemService
              mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
              mScreenBrightnessSettingMaximum = pm.getMaximumScreenBrightnessSetting();
              mScreenBrightnessSettingDefault = pm.getDefaultScreenBrightnessSetting();
@@ -323,7 +328,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
  
              SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
  
-@@ -1013,21 +1011,31 @@ public final class PowerManagerService extends SystemService
+@@ -1008,21 +1011,31 @@ public final class PowerManagerService extends SystemService
          resolver.registerContentObserver(Settings.Global.getUriFor(
                  Settings.Global.DEVICE_DEMO_MODE),
                  false, mSettingsObserver, UserHandle.USER_SYSTEM);
@@ -367,7 +372,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
          resolver.registerContentObserver(Settings.System.getUriFor(
                  Settings.System.WAKELOCK_BLOCKING_ENABLED),
                  false, mSettingsObserver, UserHandle.USER_ALL);
-@@ -1130,6 +1138,10 @@ public final class PowerManagerService extends SystemService
+@@ -1132,6 +1145,10 @@ public final class PowerManagerService extends SystemService
              mProximityWakeLock = mContext.getSystemService(PowerManager.class)
                      .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ProximityWakeLock");
          }
@@ -378,7 +383,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
      }
  
      private void updateSettingsLocked() {
-@@ -1196,27 +1208,12 @@ public final class PowerManagerService extends SystemService
+@@ -1198,27 +1215,12 @@ public final class PowerManagerService extends SystemService
                  Settings.System.SCREEN_BRIGHTNESS_MODE,
                  Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
  
@@ -407,7 +412,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
          mDirty |= DIRTY_SETTINGS;
      }
  
-@@ -1566,6 +1563,7 @@ public final class PowerManagerService extends SystemService
+@@ -1568,6 +1570,7 @@ public final class PowerManagerService extends SystemService
  
          Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
          try {
@@ -415,7 +420,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
              if (eventTime > mLastInteractivePowerHintTime) {
                  powerHintInternal(PowerHint.INTERACTION, 0);
                  mLastInteractivePowerHintTime = eventTime;
-@@ -1599,13 +1597,6 @@ public final class PowerManagerService extends SystemService
+@@ -1601,13 +1604,6 @@ public final class PowerManagerService extends SystemService
                  }
              } else {
                  if (eventTime > mLastUserActivityTime) {
@@ -429,7 +434,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
                      mLastUserActivityTime = eventTime;
                      mDirty |= DIRTY_USER_ACTIVITY;
                      if (event == PowerManager.USER_ACTIVITY_EVENT_BUTTON) {
-@@ -2326,6 +2317,14 @@ public final class PowerManagerService extends SystemService
+@@ -2317,6 +2313,14 @@ public final class PowerManagerService extends SystemService
                  | DIRTY_WAKEFULNESS | DIRTY_SETTINGS)) != 0) {
              mHandler.removeMessages(MSG_USER_ACTIVITY_TIMEOUT);
  
@@ -444,7 +449,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
              long nextTimeout = 0;
              if (mWakefulness == WAKEFULNESS_AWAKE
                      || mWakefulness == WAKEFULNESS_DREAMING
-@@ -2341,58 +2340,30 @@ public final class PowerManagerService extends SystemService
+@@ -2332,58 +2336,30 @@ public final class PowerManagerService extends SystemService
                      nextTimeout = mLastUserActivityTime
                              + screenOffTimeout - screenDimDuration;
                      if (now < nextTimeout) {
@@ -512,7 +517,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
                              mUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
                          } else if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
                              mUserActivitySummary = USER_ACTIVITY_SCREEN_DIM;
-@@ -2813,6 +2784,12 @@ public final class PowerManagerService extends SystemService
+@@ -2804,6 +2780,12 @@ public final class PowerManagerService extends SystemService
                  mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
              }
  
@@ -525,7 +530,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
              mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
                      mRequestWaitForNegativeProximity);
              mRequestWaitForNegativeProximity = false;
-@@ -3507,16 +3484,6 @@ public final class PowerManagerService extends SystemService
+@@ -3498,16 +3480,6 @@ public final class PowerManagerService extends SystemService
          }
      }
  
@@ -542,7 +547,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
      private void setUserInactiveOverrideFromWindowManagerInternal() {
          synchronized (mLock) {
              mUserInactiveOverrideFromWindowManager = true;
-@@ -3577,6 +3544,12 @@ public final class PowerManagerService extends SystemService
+@@ -3568,6 +3540,12 @@ public final class PowerManagerService extends SystemService
          nativeSendPowerHint(hintId, data);
      }
  
@@ -555,7 +560,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
      /**
       * Low-level function turn the device off immediately, without trying
       * to be clean.  Most people should use {@link ShutdownThread} for a clean shutdown.
-@@ -4285,6 +4258,12 @@ public final class PowerManagerService extends SystemService
+@@ -4276,6 +4254,12 @@ public final class PowerManagerService extends SystemService
                      cleanupProximity();
                      ((Runnable) msg.obj).run();
                      break;
@@ -568,7 +573,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
              }
          }
      }
-@@ -5073,6 +5052,19 @@ public final class PowerManagerService extends SystemService
+@@ -5064,6 +5048,19 @@ public final class PowerManagerService extends SystemService
              }
          }
  
@@ -588,7 +593,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
          @Override
          /* updates the blocked uids, so if a wake lock is acquired for it
           * can be released.
-@@ -5145,18 +5137,6 @@ public final class PowerManagerService extends SystemService
+@@ -5136,18 +5133,6 @@ public final class PowerManagerService extends SystemService
              setScreenBrightnessOverrideFromWindowManagerInternal(screenBrightness);
          }
  
@@ -607,7 +612,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
          @Override
          public void setDozeOverrideFromDreamManager(int screenState, int screenBrightness) {
              switch (screenState) {
-@@ -5179,7 +5159,6 @@ public final class PowerManagerService extends SystemService
+@@ -5170,7 +5155,6 @@ public final class PowerManagerService extends SystemService
              setDozeOverrideFromDreamManagerInternal(screenState, screenBrightness);
          }
  
@@ -615,7 +620,7 @@ index f9e8e1ca8a99..c92e13572ed8 100755
          @Override
          public void setUserInactiveOverrideFromWindowManager() {
              setUserInactiveOverrideFromWindowManagerInternal();
-@@ -5338,4 +5317,106 @@ public final class PowerManagerService extends SystemService
+@@ -5329,4 +5313,106 @@ public final class PowerManagerService extends SystemService
                     mProximitySensor, SensorManager.SENSOR_DELAY_FASTEST);
          }
      }

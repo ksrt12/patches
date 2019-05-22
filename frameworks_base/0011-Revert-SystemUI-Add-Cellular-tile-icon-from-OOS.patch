@@ -1,4 +1,4 @@
-From 9e3da7f9b884ed3cf0905ea422bddba5e7cd003c Mon Sep 17 00:00:00 2001
+From a79d0884d8c0b1c3eec4dc887cdd4ad8707b98b8 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Tue, 26 Mar 2019 22:00:39 +0300
 Subject: [PATCH 11/12] Revert "SystemUI: Add Cellular tile icon from OOS"

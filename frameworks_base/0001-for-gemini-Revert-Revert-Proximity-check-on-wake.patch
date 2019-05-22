@@ -1,4 +1,4 @@
-From 5ede2043cb77b7c79a94aedca05722256f65a77e Mon Sep 17 00:00:00 2001
+From 6259c1c4f3b3dd5d3aa9744401f94eb0cac6d7f2 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Mon, 13 May 2019 01:48:51 +0300
 Subject: [PATCH 01/12] for gemini: Revert "Revert "Proximity check on wake""
@@ -702,7 +702,7 @@ index 0e0ea3fd7cfd..000000000000
 -
 -</LinearLayout>
 diff --git a/core/res/res/values/havoc_config.xml b/core/res/res/values/havoc_config.xml
-index c7b0dc63a8b8..2c5cf3267823 100644
+index 0b4884142417..0abe5f249598 100644
 --- a/core/res/res/values/havoc_config.xml
 +++ b/core/res/res/values/havoc_config.xml
 @@ -174,6 +174,13 @@
@@ -729,7 +729,7 @@ index c7b0dc63a8b8..2c5cf3267823 100644
 -
      <!-- Smart charging battery percentage -->
      <integer name="config_smartChargingBatteryLevel">80</integer>
- </resources>
+ 
 diff --git a/core/res/res/values/havoc_strings.xml b/core/res/res/values/havoc_strings.xml
 index acbe57ba1a1d..5e0bb3419364 100644
 --- a/core/res/res/values/havoc_strings.xml
@@ -743,7 +743,7 @@ index acbe57ba1a1d..5e0bb3419364 100644
 -    <string name="pocket_lock_message_long_press">Press and hold power button to unlock</string> 
  </resources>
 diff --git a/core/res/res/values/havoc_symbols.xml b/core/res/res/values/havoc_symbols.xml
-index fc2af951887f..6586bee63af3 100644
+index ff9001c52aa9..f2b2b433c598 100644
 --- a/core/res/res/values/havoc_symbols.xml
 +++ b/core/res/res/values/havoc_symbols.xml
 @@ -191,6 +191,15 @@
@@ -897,19 +897,19 @@ index 21dfba11bc9e..27e3f294463e 100644
  
      private void startListeningForFingerprint() {
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
-index 06da082df876..3d5e2b6c8458 100644
+index 6b608c612838..d080fdb6714f 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java
-@@ -687,8 +687,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -686,8 +686,6 @@ public class StatusBar extends SystemUI implements DemoMode,
  
      private boolean mWallpaperSupportsAmbientMode;
  
 -    private boolean mPocketJudgeAllowFP;
 -
+     private BitmapDrawable altDrawable;
+ 
      private BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
-         @Override
-         public void onReceive(Context context, Intent intent) {
-@@ -5778,9 +5776,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -5760,9 +5758,6 @@ public class StatusBar extends SystemUI implements DemoMode,
              resolver.registerContentObserver(Settings.System.getUriFor(
                    Settings.System.LOCKSCREEN_ALBUM_ART_FILTER),
                    false, this, UserHandle.USER_ALL);
@@ -919,7 +919,7 @@ index 06da082df876..3d5e2b6c8458 100644
  	    }
  
          @Override
-@@ -5885,9 +5880,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -5867,9 +5862,6 @@ public class StatusBar extends SystemUI implements DemoMode,
              } else if (uri.equals(Settings.System.getUriFor(
                      Settings.System.USE_OLD_MOBILETYPE))) {
                  updateTelephonyIcons();
@@ -929,7 +929,7 @@ index 06da082df876..3d5e2b6c8458 100644
              }
          }
  
-@@ -5910,7 +5902,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -5892,7 +5884,6 @@ public class StatusBar extends SystemUI implements DemoMode,
              updateKeyguardStatusBarSettings();
              updateLockscreenFilter();
              updateTelephonyIcons();
@@ -937,7 +937,7 @@ index 06da082df876..3d5e2b6c8458 100644
          }
      }
  
-@@ -6067,11 +6058,6 @@ public class StatusBar extends SystemUI implements DemoMode,
+@@ -6048,11 +6039,6 @@ public class StatusBar extends SystemUI implements DemoMode,
          TelephonyIcons.updateIcons(USE_OLD_MOBILETYPE);
      }
  
@@ -2492,7 +2492,7 @@ index a432d7cce428..000000000000
 -
 -}
 diff --git a/services/core/java/com/android/server/power/PowerManagerService.java b/services/core/java/com/android/server/power/PowerManagerService.java
-index 5ced6692194d..f9e8e1ca8a99 100755
+index ed00642318f0..a5257b9ff697 100755
 --- a/services/core/java/com/android/server/power/PowerManagerService.java
 +++ b/services/core/java/com/android/server/power/PowerManagerService.java
 @@ -34,6 +34,9 @@ import android.content.IntentFilter;
@@ -2521,15 +2521,15 @@ index 5ced6692194d..f9e8e1ca8a99 100755
  
      // Dirty bit: mWakeLocks changed
      protected static final int DIRTY_WAKE_LOCKS = 1 << 0;
-@@ -238,6 +243,7 @@ public final class PowerManagerService extends SystemService
-     private static final String BATTERY_CHARGER_PATH =
-             "/sys/class/power_supply/battery/battery_charging_enabled";
-     private static final String CHARGER_PATH = "/sys/class/power_supply/battery/charging_enabled";
-+    private static final float PROXIMITY_NEAR_THRESHOLD = 5.0f;
+@@ -234,6 +239,7 @@ public final class PowerManagerService extends SystemService
+     // Persistent property for last reboot reason
+     private static final String LAST_REBOOT_PROPERTY = "persist.sys.boot.reason";
  
++    private static final float PROXIMITY_NEAR_THRESHOLD = 5.0f;
      private final Context mContext;
      private final ServiceThread mHandlerThread;
-@@ -709,7 +715,17 @@ public final class PowerManagerService extends SystemService
+     private final Thread mWaitMpctlThread;
+@@ -703,7 +709,17 @@ public final class PowerManagerService extends SystemService
      private static native void nativeSendPowerHint(int hintId, int data);
      private static native void nativeSetFeature(int featureId, int data);
  
@@ -2547,7 +2547,7 @@ index 5ced6692194d..f9e8e1ca8a99 100755
  
      public PowerManagerService(Context context) {
          super(context);
-@@ -943,6 +959,10 @@ public final class PowerManagerService extends SystemService
+@@ -938,6 +954,10 @@ public final class PowerManagerService extends SystemService
                  // Shouldn't happen since in-process.
              }
  
@@ -2558,7 +2558,7 @@ index 5ced6692194d..f9e8e1ca8a99 100755
              // Go.
              readConfigurationLocked();
              updateSettingsLocked();
-@@ -1014,6 +1034,9 @@ public final class PowerManagerService extends SystemService
+@@ -1009,6 +1029,9 @@ public final class PowerManagerService extends SystemService
          resolver.registerContentObserver(Settings.System.getUriFor(
                  Settings.System.WAKELOCK_BLOCKING_LIST),
                  false, mSettingsObserver, UserHandle.USER_ALL);
@@ -2568,10 +2568,10 @@ index 5ced6692194d..f9e8e1ca8a99 100755
          resolver.registerContentObserver(Settings.System.getUriFor(
                  Settings.System.DOZE_ON_CHARGE_NOW),
                  false, mSettingsObserver, UserHandle.USER_ALL);
-@@ -1097,6 +1120,16 @@ public final class PowerManagerService extends SystemService
-                 com.android.internal.R.bool.config_supportDoubleTapWake);
-         mSmartChargingLevelDefaultConfig = resources.getInteger(
-                 com.android.internal.R.integer.config_smartChargingBatteryLevel);
+@@ -1099,6 +1122,16 @@ public final class PowerManagerService extends SystemService
+                 com.android.internal.R.string.config_SmartChargingSupspendValue);
+         mPowerInputResumeValue = resources.getString(
+                 com.android.internal.R.string.config_SmartChargingResumeValue);
 +        mProximityTimeOut = resources.getInteger(
 +                com.android.internal.R.integer.config_proximityCheckTimeout);
 +        mProximityWakeSupported = resources.getBoolean(
@@ -2585,7 +2585,7 @@ index 5ced6692194d..f9e8e1ca8a99 100755
      }
  
      private void updateSettingsLocked() {
-@@ -1179,6 +1212,11 @@ public final class PowerManagerService extends SystemService
+@@ -1181,6 +1214,11 @@ public final class PowerManagerService extends SystemService
                  Settings.Secure.HARDWARE_KEYS_DISABLE, 0,
                  UserHandle.USER_CURRENT) != 0;
  
@@ -2597,7 +2597,7 @@ index 5ced6692194d..f9e8e1ca8a99 100755
          mDirty |= DIRTY_SETTINGS;
      }
  
-@@ -4243,6 +4281,10 @@ public final class PowerManagerService extends SystemService
+@@ -4234,6 +4272,10 @@ public final class PowerManagerService extends SystemService
                  case MSG_CHECK_FOR_LONG_WAKELOCKS:
                      checkForLongWakeLocks();
                      break;
@@ -2608,7 +2608,7 @@ index 5ced6692194d..f9e8e1ca8a99 100755
              }
          }
      }
-@@ -4685,6 +4727,19 @@ public final class PowerManagerService extends SystemService
+@@ -4676,6 +4718,19 @@ public final class PowerManagerService extends SystemService
  
          @Override // Binder call
          public void wakeUp(long eventTime, String reason, String opPackageName) {
@@ -2628,7 +2628,7 @@ index 5ced6692194d..f9e8e1ca8a99 100755
              if (eventTime > SystemClock.uptimeMillis()) {
                  throw new IllegalArgumentException("event time must not be in the future");
              }
-@@ -4693,11 +4748,21 @@ public final class PowerManagerService extends SystemService
+@@ -4684,11 +4739,21 @@ public final class PowerManagerService extends SystemService
                      android.Manifest.permission.DEVICE_POWER, null);
  
              final int uid = Binder.getCallingUid();
@@ -2655,7 +2655,7 @@ index 5ced6692194d..f9e8e1ca8a99 100755
              }
          }
  
-@@ -5201,4 +5266,76 @@ public final class PowerManagerService extends SystemService
+@@ -5192,4 +5257,76 @@ public final class PowerManagerService extends SystemService
              powerHintInternal(hintId, data);
          }
      }
