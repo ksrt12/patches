@@ -3,3 +3,4 @@ apply.sh
 bootanimation.zip
 *.txt
 *.diff
+old*/*

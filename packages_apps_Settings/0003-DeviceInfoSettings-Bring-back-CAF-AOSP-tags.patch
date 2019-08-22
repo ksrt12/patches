@@ -1,7 +1,7 @@
-From 3ffbd33fee25791ebd73fa8849a29c6713dcffd5 Mon Sep 17 00:00:00 2001
+From c062662ebbcaaba0d4afb40718eab22b93e2f59e Mon Sep 17 00:00:00 2001
 From: Harsh Shandilya <msfjarvis@gmail.com>
 Date: Thu, 24 Aug 2017 13:34:12 +0000
-Subject: [PATCH 2/4] DeviceInfoSettings: Bring back CAF/AOSP tags
+Subject: [PATCH 3/6] DeviceInfoSettings: Bring back CAF/AOSP tags
 
 Change-Id: I8d9a50abbd9158704c8d32edcb8de60172a21475
 Signed-off-by: Simao Gomes Viana <xdevs23@outlook.com>
@@ -16,10 +16,10 @@ Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
  create mode 100644 src/com/android/settings/deviceinfo/RomTagsPreferenceController.java
 
 diff --git a/res/values/havoc_strings.xml b/res/values/havoc_strings.xml
-index 60c2ff9e0e..23789eeb6f 100644
+index e6a20a5a70..b6885aa31d 100644
 --- a/res/values/havoc_strings.xml
 +++ b/res/values/havoc_strings.xml
-@@ -398,6 +398,9 @@
+@@ -386,6 +386,9 @@
      <string name="data_usage_app_restrict_wifi">Wi\u2011Fi data</string>
      <string name="data_usage_app_restrict_wifi_summary">Enable usage of Wi\u2011Fi data</string>
  
@@ -143,5 +143,5 @@ index ec874503e0..7413345ac5 100644
          controllers.add(new HavocInfoPreferenceController(context, fragment));
          controllers.add(
 -- 
-2.19.1
+2.20.1
 

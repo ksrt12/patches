@@ -1,7 +1,7 @@
-From b4b05493bdda3b5aabeeed795eef7c90f5232628 Mon Sep 17 00:00:00 2001
+From d6a7ed76e4017b6a237dcf576d36ae56d0cc7821 Mon Sep 17 00:00:00 2001
 From: Kazakov Stepan <ksrt12group@gmail.com>
 Date: Sun, 23 Dec 2018 21:17:29 +0300
-Subject: [PATCH 3/4] Havoc Build Date [2/2]
+Subject: [PATCH 4/6] Havoc Build Date [2/2]
 
 Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
 ---
@@ -59,5 +59,5 @@ index 0fc9b5bd26..40869d59f4 100644
      private static final int HAVOC_MAINTAINER_LABEL_ID = R.id.havoc_maintainer_label;
  
 -- 
-2.19.1
+2.20.1
 

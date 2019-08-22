@@ -1,0 +1,405 @@
+From bb896caf0f4ecdab96900625a91a7a5988833e2a Mon Sep 17 00:00:00 2001
+From: Kazakov Stepan <ksrt12group@gmail.com>
+Date: Mon, 19 Aug 2019 00:47:29 +0300
+Subject: [PATCH 6/6] add SearchIndexProvider into HavocSettings [2/2]
+
+* from https://github.com/syberia-project/platform_packages_apps_Settings/commit/7e3c7c542ad4cade41e5a2cf12fd05dd6d349b96
+
+Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
+---
+ src/com/android/settings/Settings.java        |  54 ++++++++-
+ .../core/gateway/SettingsGateway.java         | 106 +++++++++++++++--
+ .../aboutphone/MyDeviceInfoFragment.java      |  21 ++--
+ .../search/SearchIndexableResourcesImpl.java  | 107 ++++++++++++++++++
+ 4 files changed, 263 insertions(+), 25 deletions(-)
+
+diff --git a/src/com/android/settings/Settings.java b/src/com/android/settings/Settings.java
+index bf0633a184..5393e88dc6 100644
+--- a/src/com/android/settings/Settings.java
++++ b/src/com/android/settings/Settings.java
+@@ -176,7 +176,6 @@ public class Settings extends SettingsActivity {
+     public static class AccountDashboardActivity extends SettingsActivity {}
+     public static class SystemDashboardActivity extends SettingsActivity {}
+     public static class HavocSettingsActivity extends SettingsActivity {}
+-    public static class HeadsUpSettingsActivity extends SettingsActivity { /* empty */ }
+     public static class ButtonSettingsActivity extends SettingsActivity { /* empty */ }
+     public static class DevRunningServicesActivity extends SettingsActivity { /* empty */ }
+     public static class InterfaceSettingsActivity extends SettingsActivity { /* empty */ }
+@@ -192,5 +191,56 @@ public class Settings extends SettingsActivity {
+     public static class SmartbarSettingsActivity extends SettingsActivity {}
+     public static class FlingSettingsActivity extends SettingsActivity {}
+     public static class PulseSettingsActivity extends SettingsActivity {}
+-    public static class GamingModeActivity extends SettingsActivity {}
++
++    public static class AboutActivity extends SettingsActivity { /* empty */ }
++    public static class ActiveEdgeActivity extends SettingsActivity { /* empty */ }
++    public static class AggressiveBatteryActivity extends SettingsActivity { /* empty */ }
++    public static class AnimationsActivity extends SettingsActivity { /* empty */ }
++    public static class BatterybarSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class BatteryActivity extends SettingsActivity { /* empty */ }
++    public static class BatteryLightSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class ButtonsActivity extends SettingsActivity { /* empty */ }
++    public static class CarbonGesturesSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class CarrierLabelSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class CutoutFragmentActivity extends SettingsActivity { /* empty */ }
++    public static class DisplayActivity extends SettingsActivity { /* empty */ }
++    public static class DozeFragmentActivity extends SettingsActivity { /* empty */ }
++    public static class EdgeGesturesSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class ExpandedDesktopExtraPrefsActivity extends SettingsActivity { /* empty */ }
++    public static class GamingModeActivity extends SettingsActivity { /* empty */ }
++    public static class GestureAnywhereSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class GesturesActivity extends SettingsActivity { /* empty */ }
++    public static class HeadsUpSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class IMEActivity extends SettingsActivity { /* empty */ }
++    public static class InterfaceActivity extends SettingsActivity { /* empty */ }
++    public static class LockClockActivity extends SettingsActivity { /* empty */ }
++    public static class LockDateActivity extends SettingsActivity { /* empty */ }
++    public static class LockScreenActivity extends SettingsActivity { /* empty */ }
++    public static class LockscreenShortcutFragmentActivity extends SettingsActivity { /* empty */ }
++    public static class MiscActivity extends SettingsActivity { /* empty */ }
++    public static class NetworkTrafficActivity extends SettingsActivity { /* empty */ }
++    public static class NotificationsActivity extends SettingsActivity { /* empty */ }
++    public static class OneplusGesturesSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class PieSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class PowerMenuActivity extends SettingsActivity { /* empty */ }
++    public static class QsHeaderActivity extends SettingsActivity { /* empty */ }
++    public static class QuickSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class RecentsActivity extends SettingsActivity { /* empty */ }
++    public static class RecentsStylesActivity extends SettingsActivity { /* empty */ }
++    public static class ScreenStabilizationActivity extends SettingsActivity { /* empty */ }
++    public static class ScreenStateTogglesActivity extends SettingsActivity { /* empty */ }
++    public static class SlimRecentAppSidebarActivity extends SettingsActivity { /* empty */ }
++    public static class SlimRecentAppSidebarStyleActivity extends SettingsActivity { /* empty */ }
++    public static class SlimRecentsBlacklistActivity extends SettingsActivity { /* empty */ }
++    public static class SlimRecentsActivity extends SettingsActivity { /* empty */ }
++    public static class SmartPixelsActivity extends SettingsActivity { /* empty */ }
++    public static class StatusbarClockSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class StatusBarActivity extends SettingsActivity { /* empty */ }
++    public static class StatusbarLogoActivity extends SettingsActivity { /* empty */ }
++    public static class StockRecentsActivity extends SettingsActivity { /* empty */ }
++    public static class SystemActivity extends SettingsActivity { /* empty */ }
++    public static class TickerSettingsActivity extends SettingsActivity { /* empty */ }
++    public static class VisualizerActivity extends SettingsActivity { /* empty */ }
++    public static class VolumeActivity extends SettingsActivity { /* empty */ }
++    public static class VolumeStepsActivity extends SettingsActivity { /* empty */ }
+ }
+diff --git a/src/com/android/settings/core/gateway/SettingsGateway.java b/src/com/android/settings/core/gateway/SettingsGateway.java
+index 9d6f1c9d6b..c3c9bc3cb6 100644
+--- a/src/com/android/settings/core/gateway/SettingsGateway.java
++++ b/src/com/android/settings/core/gateway/SettingsGateway.java
+@@ -147,15 +147,58 @@ import com.android.settings.wifi.p2p.WifiP2pSettings;
+ import com.android.settings.wifi.tether.WifiTetherSettings;
+ 
+ import com.havoc.settings.HavocSettings;
++import com.havoc.settings.fragments.About;
++import com.havoc.settings.fragments.ActiveEdge;
++import com.havoc.settings.fragments.AggressiveBattery;
++import com.havoc.settings.fragments.Animations;
++import com.havoc.settings.fragments.BatterybarSettings;
++import com.havoc.settings.fragments.Battery;
++import com.havoc.settings.fragments.BatteryLightSettings;
+ import com.havoc.settings.fragments.Buttons;
++import com.havoc.settings.fragments.CarbonGesturesSettings;
++import com.havoc.settings.fragments.CarrierLabelSettings;
++import com.havoc.settings.fragments.CutoutFragment;
+ import com.havoc.settings.fragments.Display;
+ import com.havoc.settings.fragments.DozeFragment;
++import com.havoc.settings.fragments.EdgeGesturesSettings;
++import com.havoc.settings.fragments.ExpandedDesktopExtraPrefs;
+ import com.havoc.settings.fragments.ExpandedDesktopPreferenceFragment;
+ import com.havoc.settings.fragments.GamingMode;
++import com.havoc.settings.fragments.GestureAnywhereSettings;
++import com.havoc.settings.fragments.Gestures;
+ import com.havoc.settings.fragments.HeadsUpSettings;
++import com.havoc.settings.fragments.IME;
+ import com.havoc.settings.fragments.Interface;
++import com.havoc.settings.fragments.LockClock;
++import com.havoc.settings.fragments.LockDate;
++import com.havoc.settings.fragments.LockScreen;
++import com.havoc.settings.fragments.LockscreenShortcutFragment;
++import com.havoc.settings.fragments.Misc;
++import com.havoc.settings.fragments.NetworkTraffic;
++import com.havoc.settings.fragments.Notifications;
++import com.havoc.settings.fragments.OneplusGesturesSettings;
+ import com.havoc.settings.fragments.PieSettings;
++import com.havoc.settings.fragments.PowerMenu;
++import com.havoc.settings.fragments.QsHeader;
++import com.havoc.settings.fragments.QuickSettings;
++import com.havoc.settings.fragments.Recents;
++import com.havoc.settings.fragments.RecentsStyles;
++import com.havoc.settings.fragments.ScreenStabilization;
+ import com.havoc.settings.fragments.ScreenStateToggles;
++import com.havoc.settings.fragments.SlimRecentAppSidebar;
++import com.havoc.settings.fragments.SlimRecentAppSidebarStyle;
++import com.havoc.settings.fragments.SlimRecentsBlacklist;
++import com.havoc.settings.fragments.SlimRecents;
++import com.havoc.settings.fragments.SmartPixels;
++import com.havoc.settings.fragments.StatusbarClockSettings;
++import com.havoc.settings.fragments.StatusBar;
++import com.havoc.settings.fragments.StatusbarLogo;
++import com.havoc.settings.fragments.StockRecents;
++import com.havoc.settings.fragments.System;
++import com.havoc.settings.fragments.TickerSettings;
++import com.havoc.settings.fragments.Visualizer;
++import com.havoc.settings.fragments.Volume;
++import com.havoc.settings.fragments.VolumeSteps;
+ 
+ public class SettingsGateway {
+ 
+@@ -282,23 +325,66 @@ public class SettingsGateway {
+             DirectoryAccessDetails.class.getName(),
+             ToggleBackupSettingFragment.class.getName(),
+             PreviouslyConnectedDeviceDashboardFragment.class.getName(),
+-            HavocSettings.class.getName(),
+-            HeadsUpSettings.class.getName(),
+-            Buttons.class.getName(),
+             RunningServices.class.getName(),
+-            Interface.class.getName(),
+-            DozeFragment.class.getName(),
+-            Display.class.getName(),
+-            ExpandedDesktopPreferenceFragment.class.getName(),
+-            ScreenStateToggles.class.getName(),
+             DisplayRotation.class.getName(),
+-            PieSettings.class.getName(),
+             NavigationSettingsActivity.class.getName(),
+             SmartbarSettingsActivity.class.getName(),
+             FlingSettingsActivity.class.getName(),
+             PulseSettingsActivity.class.getName(),
+             LiveDisplaySettings.class.getName(),
+-            GamingMode.class.getName()
++            HavocSettings.class.getName(),
++            About.class.getName(),
++            ActiveEdge.class.getName(),
++            AggressiveBattery.class.getName(),
++            Animations.class.getName(),
++            BatterybarSettings.class.getName(),
++            Battery.class.getName(),
++            BatteryLightSettings.class.getName(),
++            Buttons.class.getName(),
++            CarbonGesturesSettings.class.getName(),
++            CarrierLabelSettings.class.getName(),
++            CutoutFragment.class.getName(),
++            Display.class.getName(),
++            DozeFragment.class.getName(),
++            EdgeGesturesSettings.class.getName(),
++            ExpandedDesktopExtraPrefs.class.getName(),
++            ExpandedDesktopPreferenceFragment.class.getName(),
++            GamingMode.class.getName(),
++            GestureAnywhereSettings.class.getName(),
++            Gestures.class.getName(),
++            HeadsUpSettings.class.getName(),
++            IME.class.getName(),
++            Interface.class.getName(),
++            LockClock.class.getName(),
++            LockDate.class.getName(),
++            LockScreen.class.getName(),
++            LockscreenShortcutFragment.class.getName(),
++            Misc.class.getName(),
++            NetworkTraffic.class.getName(),
++            Notifications.class.getName(),
++            OneplusGesturesSettings.class.getName(),
++            PieSettings.class.getName(),
++            PowerMenu.class.getName(),
++            QsHeader.class.getName(),
++            QuickSettings.class.getName(),
++            Recents.class.getName(),
++            RecentsStyles.class.getName(),
++            ScreenStabilization.class.getName(),
++            ScreenStateToggles.class.getName(),
++            SlimRecentAppSidebar.class.getName(),
++            SlimRecentAppSidebarStyle.class.getName(),
++            SlimRecentsBlacklist.class.getName(),
++            SlimRecents.class.getName(),
++            SmartPixels.class.getName(),
++            StatusbarClockSettings.class.getName(),
++            StatusBar.class.getName(),
++            StatusbarLogo.class.getName(),
++            StockRecents.class.getName(),
++            System.class.getName(),
++            TickerSettings.class.getName(),
++            Visualizer.class.getName(),
++            Volume.class.getName(),
++            VolumeSteps.class.getName()
+     };
+ 
+     public static final String[] SETTINGS_FOR_RESTRICTED = {
+diff --git a/src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java b/src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java
+index 7413345ac5..c4ca6d6e1a 100644
+--- a/src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java
++++ b/src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java
+@@ -48,6 +48,7 @@ import com.android.settings.deviceinfo.firmwareversion.FirmwareVersionPreference
+ import com.android.settings.deviceinfo.havoc.HavocInfoPreferenceController;
+ import com.android.settings.deviceinfo.simstatus.SimStatusPreferenceController;
+ import com.android.settings.search.BaseSearchIndexProvider;
++import com.android.settings.search.Indexable;
+ import com.android.settings.widget.EntityHeaderController;
+ import com.android.settingslib.core.AbstractPreferenceController;
+ import com.android.settingslib.core.lifecycle.Lifecycle;
+@@ -57,7 +58,7 @@ import java.util.Arrays;
+ import java.util.List;
+ 
+ public class MyDeviceInfoFragment extends DashboardFragment
+-        implements DeviceNamePreferenceController.DeviceNamePreferenceHost {
++        implements DeviceNamePreferenceController.DeviceNamePreferenceHost, Indexable {
+     private static final String LOG_TAG = "MyDeviceInfoFragment";
+ 
+     private static final String KEY_MY_DEVICE_INFO_HEADER = "my_device_info_header";
+@@ -201,24 +202,18 @@ public class MyDeviceInfoFragment extends DashboardFragment
+                 @Override
+                 public List<SearchIndexableResource> getXmlResourcesToIndex(
+                         Context context, boolean enabled) {
++                    final ArrayList<SearchIndexableResource> result = new ArrayList<>();
++
+                     final SearchIndexableResource sir = new SearchIndexableResource(context);
+                     sir.xmlResId = R.xml.my_device_info;
+-                    return Arrays.asList(sir);
+-                }
+-
+-                @Override
+-                public List<AbstractPreferenceController> createPreferenceControllers(
+-                        Context context) {
+-                    return buildPreferenceControllers(context, null /*activity */,
+-                            null /* fragment */, null /* lifecycle */);
++                    result.add(sir);
++                    return result;
+                 }
+ 
+                 @Override
+                 public List<String> getNonIndexableKeys(Context context) {
+-                    List<String> keys = super.getNonIndexableKeys(context);
+-                    // The legal container is duplicated, so we ignore it here.
+-                    //keys.add(KEY_LEGAL_CONTAINER);
++                    final List<String> keys = super.getNonIndexableKeys(context);
+                     return keys;
+                 }
+-            };
++    };
+ }
+diff --git a/src/com/android/settings/search/SearchIndexableResourcesImpl.java b/src/com/android/settings/search/SearchIndexableResourcesImpl.java
+index 441f639e7c..06b14d41d9 100644
+--- a/src/com/android/settings/search/SearchIndexableResourcesImpl.java
++++ b/src/com/android/settings/search/SearchIndexableResourcesImpl.java
+@@ -99,6 +99,59 @@ import com.android.settings.wfd.WifiDisplaySettings;
+ import com.android.settings.wifi.ConfigureWifiSettings;
+ import com.android.settings.wifi.WifiSettings;
+ 
++import com.havoc.settings.HavocSettings;
++import com.havoc.settings.fragments.About;
++import com.havoc.settings.fragments.ActiveEdge;
++import com.havoc.settings.fragments.AggressiveBattery;
++import com.havoc.settings.fragments.Animations;
++import com.havoc.settings.fragments.BatterybarSettings;
++import com.havoc.settings.fragments.Battery;
++import com.havoc.settings.fragments.BatteryLightSettings;
++import com.havoc.settings.fragments.Buttons;
++import com.havoc.settings.fragments.CarbonGesturesSettings;
++import com.havoc.settings.fragments.CarrierLabelSettings;
++import com.havoc.settings.fragments.CutoutFragment;
++import com.havoc.settings.fragments.Display;
++import com.havoc.settings.fragments.DozeFragment;
++import com.havoc.settings.fragments.EdgeGesturesSettings;
++import com.havoc.settings.fragments.ExpandedDesktopExtraPrefs;
++import com.havoc.settings.fragments.GamingMode;
++import com.havoc.settings.fragments.GestureAnywhereSettings;
++import com.havoc.settings.fragments.Gestures;
++import com.havoc.settings.fragments.HeadsUpSettings;
++import com.havoc.settings.fragments.IME;
++import com.havoc.settings.fragments.Interface;
++import com.havoc.settings.fragments.LockClock;
++import com.havoc.settings.fragments.LockDate;
++import com.havoc.settings.fragments.LockScreen;
++import com.havoc.settings.fragments.LockscreenShortcutFragment;
++import com.havoc.settings.fragments.Misc;
++import com.havoc.settings.fragments.NetworkTraffic;
++import com.havoc.settings.fragments.Notifications;
++import com.havoc.settings.fragments.OneplusGesturesSettings;
++import com.havoc.settings.fragments.PieSettings;
++import com.havoc.settings.fragments.PowerMenu;
++import com.havoc.settings.fragments.QsHeader;
++import com.havoc.settings.fragments.QuickSettings;
++import com.havoc.settings.fragments.Recents;
++import com.havoc.settings.fragments.RecentsStyles;
++import com.havoc.settings.fragments.ScreenStabilization;
++import com.havoc.settings.fragments.ScreenStateToggles;
++import com.havoc.settings.fragments.SlimRecentAppSidebar;
++import com.havoc.settings.fragments.SlimRecentAppSidebarStyle;
++import com.havoc.settings.fragments.SlimRecentsBlacklist;
++import com.havoc.settings.fragments.SlimRecents;
++import com.havoc.settings.fragments.SmartPixels;
++import com.havoc.settings.fragments.StatusbarClockSettings;
++import com.havoc.settings.fragments.StatusBar;
++import com.havoc.settings.fragments.StatusbarLogo;
++import com.havoc.settings.fragments.StockRecents;
++import com.havoc.settings.fragments.System;
++import com.havoc.settings.fragments.TickerSettings;
++import com.havoc.settings.fragments.Visualizer;
++import com.havoc.settings.fragments.Volume;
++import com.havoc.settings.fragments.VolumeSteps;
++
+ import java.util.Collection;
+ import java.util.HashSet;
+ import java.util.Set;
+@@ -193,6 +246,60 @@ public class SearchIndexableResourcesImpl implements SearchIndexableResources {
+         addIndex(PreviouslyConnectedDeviceDashboardFragment.class);
+         addIndex(BluetoothDashboardFragment.class);
+ 
++        // HavocSettings
++        addIndex(HavocSettings.class);
++        addIndex(About.class);
++        addIndex(ActiveEdge.class);
++        addIndex(AggressiveBattery.class);
++        addIndex(Animations.class);
++        addIndex(BatterybarSettings.class);
++        addIndex(Battery.class);
++        addIndex(BatteryLightSettings.class);
++        addIndex(Buttons.class);
++        addIndex(CarbonGesturesSettings.class);
++        addIndex(CarrierLabelSettings.class);
++        addIndex(CutoutFragment.class);
++        addIndex(Display.class);
++        addIndex(DozeFragment.class);
++        addIndex(EdgeGesturesSettings.class);
++        addIndex(ExpandedDesktopExtraPrefs.class);
++        addIndex(GamingMode.class);
++        addIndex(GestureAnywhereSettings.class);
++        addIndex(Gestures.class);
++        addIndex(HeadsUpSettings.class);
++        addIndex(IME.class);
++        addIndex(Interface.class);
++        addIndex(LockClock.class);
++        addIndex(LockDate.class);
++        addIndex(LockScreen.class);
++        addIndex(LockscreenShortcutFragment.class);
++        addIndex(Misc.class);
++        addIndex(NetworkTraffic.class);
++        addIndex(Notifications.class);
++        addIndex(OneplusGesturesSettings.class);
++        addIndex(PieSettings.class);
++        addIndex(PowerMenu.class);
++        addIndex(QsHeader.class);
++        addIndex(QuickSettings.class);
++        addIndex(Recents.class);
++        addIndex(RecentsStyles.class);
++        addIndex(ScreenStabilization.class);
++        addIndex(ScreenStateToggles.class);
++        addIndex(SlimRecentAppSidebar.class);
++        addIndex(SlimRecentAppSidebarStyle.class);
++        addIndex(SlimRecentsBlacklist.class);
++        addIndex(SlimRecents.class);
++        addIndex(SmartPixels.class);
++        addIndex(StatusbarClockSettings.class);
++        addIndex(StatusBar.class);
++        addIndex(StatusbarLogo.class);
++        addIndex(StockRecents.class);
++        addIndex(System.class);
++        addIndex(TickerSettings.class);
++        addIndex(Visualizer.class);
++        addIndex(Volume.class);
++        addIndex(VolumeSteps.class);
++
+         // LiveDisplay
+         addIndex(LiveDisplaySettings.class);
+     }
+-- 
+2.20.1
+

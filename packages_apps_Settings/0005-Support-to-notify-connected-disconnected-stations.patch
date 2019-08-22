@@ -1,0 +1,40 @@
+From 1cf6d9a97b5ff4b5011c98dad524dd49811d64ae Mon Sep 17 00:00:00 2001
+From: Ajit Vaishya <ajitv@codeaurora.org>
+Date: Fri, 8 Jun 2018 20:56:45 +0530
+Subject: [PATCH 5/6] Support to notify connected/disconnected stations
+
+This commit introduces Notification to get connected /
+disconnected stations from hostapd callback.
+
+Change-Id: I2f6a94ed33ed3e18a81a7919569f039cb083e154
+CRs-Fixed: 2246506
+Signed-off-by: DennySPB <dennyspb@gmail.com>
+Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
+---
+ .../settings/wifi/tether/WifiTetherSoftApManager.java  | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/src/com/android/settings/wifi/tether/WifiTetherSoftApManager.java b/src/com/android/settings/wifi/tether/WifiTetherSoftApManager.java
+index 77a44b08ee..b7d7168606 100644
+--- a/src/com/android/settings/wifi/tether/WifiTetherSoftApManager.java
++++ b/src/com/android/settings/wifi/tether/WifiTetherSoftApManager.java
+@@ -19,6 +19,16 @@ public class WifiTetherSoftApManager {
+ 
+         @Override
+         public void onNumClientsChanged(int numClients) {
++            // Do nothing - we don't care about changing anything here.
++        }
++
++        @Override
++        public void onStaConnected(String Macaddr, int numClients) {
++            mWifiTetherSoftApCallback.onNumClientsChanged(numClients);
++        }
++
++        @Override
++        public void onStaDisconnected(String Macaddr, int numClients) {
+             mWifiTetherSoftApCallback.onNumClientsChanged(numClients);
+         }
+     };
+-- 
+2.20.1
+

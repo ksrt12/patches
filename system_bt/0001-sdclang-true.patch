@@ -1,0 +1,552 @@
+From fd2ccb42215a8871c4430306e4dedb4a0f27c5b6 Mon Sep 17 00:00:00 2001
+From: Kazakov Stepan <ksrt12group@gmail.com>
+Date: Tue, 4 Jun 2019 12:00:17 +0300
+Subject: [PATCH] sdclang: true
+
+Signed-off-by: Kazakov Stepan <ksrt12group@gmail.com>
+---
+ audio_a2dp_hw/Android.bp               | 3 +++
+ audio_hearing_aid_hw/Android.bp        | 6 +++++-
+ binder/Android.bp                      | 2 ++
+ bta/Android.bp                         | 3 +++
+ btcore/Android.bp                      | 1 +
+ btif/Android.bp                        | 2 +-
+ build/Android.bp                       | 1 +
+ device/Android.bp                      | 1 +
+ embdrv/g722/Android.bp                 | 5 +++--
+ embdrv/sbc/decoder/Android.bp          | 1 +
+ embdrv/sbc/encoder/Android.bp          | 2 ++
+ hci/Android.bp                         | 2 ++
+ include/Android.bp                     | 1 +
+ internal_include/Android.bp            | 3 ++-
+ main/Android.bp                        | 4 ++--
+ osi/Android.bp                         | 3 +++
+ packet/Android.bp                      | 2 ++
+ packet/avrcp/Android.bp                | 2 ++
+ packet/base/Android.bp                 | 2 ++
+ profile/avrcp/Android.bp               | 2 ++
+ proto/Android.bp                       | 1 +
+ service/Android.bp                     | 5 +++++
+ service/common/Android.bp              | 2 ++
+ stack/Android.bp                       | 1 +
+ test/rootcanal/Android.bp              | 2 ++
+ tools/mcap_tool/Android.bp             | 3 ++-
+ types/Android.bp                       | 1 +
+ udrv/Android.bp                        | 2 ++
+ utils/Android.bp                       | 1 +
+ vendor_libs/linux/interface/Android.bp | 1 +
+ vendor_libs/test_vendor_lib/Android.bp | 3 ++-
+ 31 files changed, 61 insertions(+), 9 deletions(-)
+
+diff --git a/audio_a2dp_hw/Android.bp b/audio_a2dp_hw/Android.bp
+index 7a23e27ee..f97f90557 100644
+--- a/audio_a2dp_hw/Android.bp
++++ b/audio_a2dp_hw/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_defaults {
+     name: "audio_a2dp_hw_defaults",
+     defaults: ["fluoride_defaults"],
+@@ -23,6 +24,7 @@ cc_library {
+         "libcutils",
+     ],
+     static_libs: ["libosi"],
++    sdclang: true,
+ }
+ 
+ cc_library_static {
+@@ -31,6 +33,7 @@ cc_library_static {
+     srcs: [
+         "src/audio_a2dp_hw_utils.cc",
+     ],
++    sdclang: true,
+ }
+ 
+ // Audio A2DP library unit tests for target and host
+diff --git a/audio_hearing_aid_hw/Android.bp b/audio_hearing_aid_hw/Android.bp
+index 229fc25ca..60363271e 100644
+--- a/audio_hearing_aid_hw/Android.bp
++++ b/audio_hearing_aid_hw/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_defaults {
+     name: "audio_hearing_aid_hw_defaults",
+     defaults: ["fluoride_defaults"],
+@@ -5,7 +6,8 @@ cc_defaults {
+         "system/bt",
+         "system/bt/include",
+         "system/bt/audio_hearing_aid_hw/include",
+-    ]
++    ],
++    sdclang: true,
+ }
+ 
+ // Audio A2DP shared library for target
+@@ -22,6 +24,7 @@ cc_library {
+         "liblog",
+     ],
+     static_libs: ["libosi"],
++    sdclang: true,
+ }
+ 
+ cc_library_static {
+@@ -30,6 +33,7 @@ cc_library_static {
+     srcs: [
+         "src/audio_hearing_aid_hw_utils.cc",
+     ],
++    sdclang: true,
+ }
+ 
+ // Audio A2DP library unit tests for target and host
+diff --git a/binder/Android.bp b/binder/Android.bp
+index 410950e1a..0fc0d8147 100644
+--- a/binder/Android.bp
++++ b/binder/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_library_shared {
+     name: "libbluetooth-binder",
+     product_variables: {
+@@ -78,6 +79,7 @@ cc_library_shared {
+         "-Wextra",
+         "-Wno-unused-parameter",
+     ],
++    sdclang: true,
+ }
+ 
+ // AIDL interface between libbluetooth-binder and framework.jar
+diff --git a/bta/Android.bp b/bta/Android.bp
+index d6919defe..7c2db7642 100644
+--- a/bta/Android.bp
++++ b/bta/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_defaults {
+     name: "fluoride_bta_defaults",
+     defaults: ["fluoride_defaults"],
+@@ -27,6 +28,7 @@ cc_defaults {
+     ],
+     header_libs: ["libbluetooth_headers"],
+     cflags: ["-DBUILDCFG"],
++    sdclang: true,
+ }
+ 
+ // BTA static library for target
+@@ -118,6 +120,7 @@ cc_library_static {
+     whole_static_libs: [
+         "libaudio-hearing-aid-hw-utils",
+     ],
++    sdclang: true,
+ }
+ 
+ // bta unit tests for target
+diff --git a/btcore/Android.bp b/btcore/Android.bp
+index 6f5b0adae..bd03dd295 100644
+--- a/btcore/Android.bp
++++ b/btcore/Android.bp
+@@ -22,6 +22,7 @@ cc_library_static {
+             cflags: ["-D_GNU_SOURCE"],
+         },
+     },
++    sdclang: true,
+ }
+ 
+ // Note: It's good to get the tests compiled both for the host and the target so
+diff --git a/btif/Android.bp b/btif/Android.bp
+index c375bf0e8..3fbd464a8 100644
+--- a/btif/Android.bp
++++ b/btif/Android.bp
+@@ -108,7 +108,7 @@ cc_library_static {
+         "lib-bt-packets",
+     ],
+     cflags: ["-DBUILDCFG"],
+-
++    sdclang: true,
+ }
+ 
+ // btif unit tests for target
+diff --git a/build/Android.bp b/build/Android.bp
+index b8abb0f55..2308ac4d0 100644
+--- a/build/Android.bp
++++ b/build/Android.bp
+@@ -1,3 +1,4 @@
++//
+ bootstrap_go_package {
+     name: "soong-fluoride",
+     pkgPath: "android/soong/fluoride",
+diff --git a/device/Android.bp b/device/Android.bp
+index 0b7cda7a9..d97909c4d 100644
+--- a/device/Android.bp
++++ b/device/Android.bp
+@@ -22,6 +22,7 @@ cc_library_static {
+     shared_libs: [
+         "liblog",
+     ],
++    sdclang: true,
+ }
+ 
+ // Bluetooth device unit tests for target
+diff --git a/embdrv/g722/Android.bp b/embdrv/g722/Android.bp
+index cc635d841..46eb79b15 100644
+--- a/embdrv/g722/Android.bp
++++ b/embdrv/g722/Android.bp
+@@ -1,4 +1,4 @@
+-
++//
+ cc_library_static {
+     name: "libg722codec",
+     defaults: ["fluoride_defaults"],
+@@ -9,4 +9,5 @@ cc_library_static {
+         "g722_decode.cc",
+         "g722_encode.cc",
+     ],
+-}
+\ No newline at end of file
++    sdclang: true,
++}
+diff --git a/embdrv/sbc/decoder/Android.bp b/embdrv/sbc/decoder/Android.bp
+index 274f2bf45..ce6cd0df6 100644
+--- a/embdrv/sbc/decoder/Android.bp
++++ b/embdrv/sbc/decoder/Android.bp
+@@ -23,4 +23,5 @@ cc_library_static {
+         "include",
+         "srce",
+     ],
++    sdclang: true,
+ }
+diff --git a/embdrv/sbc/encoder/Android.bp b/embdrv/sbc/encoder/Android.bp
+index 8ca44de21..44e18d972 100644
+--- a/embdrv/sbc/encoder/Android.bp
++++ b/embdrv/sbc/encoder/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_library_static {
+     name: "libbt-sbc-encoder",
+     defaults: ["fluoride_defaults"],
+@@ -20,4 +21,5 @@ cc_library_static {
+         "system/bt/internal_include",
+         "system/bt/stack/include",
+     ],
++    sdclang: true,
+ }
+diff --git a/hci/Android.bp b/hci/Android.bp
+index 635d939e3..c5c24700b 100644
+--- a/hci/Android.bp
++++ b/hci/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_defaults {
+     name: "libbt-hci_defaults",
+     defaults: ["fluoride_defaults"],
+@@ -14,6 +15,7 @@ cc_defaults {
+ cc_library_static {
+     name: "libbt-hci",
+     defaults: ["libbt-hci_defaults"],
++    sdclang: true,
+     srcs: [
+         "src/btsnoop.cc",
+         "src/btsnoop_mem.cc",
+diff --git a/include/Android.bp b/include/Android.bp
+index 01a01b556..c9e5d5614 100644
+--- a/include/Android.bp
++++ b/include/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_library_headers {
+     name: "avrcp_headers",
+     defaults: ["libchrome_support_defaults"],
+diff --git a/internal_include/Android.bp b/internal_include/Android.bp
+index 3ef202b3c..67b568b05 100644
+--- a/internal_include/Android.bp
++++ b/internal_include/Android.bp
+@@ -1,6 +1,7 @@
++//
+ cc_library_headers {
+     name: "internal_include_headers",
+     export_include_dirs: ["./"],
+     vendor_available: true,
+     host_supported: true,
+-}
+\ No newline at end of file
++}
+diff --git a/main/Android.bp b/main/Android.bp
+index 2213c52f7..5fb33d17a 100644
+--- a/main/Android.bp
++++ b/main/Android.bp
+@@ -1,9 +1,9 @@
+-
+ // Bluetooth main HW module / shared library for target
+ // ========================================================
+ cc_library_shared {
+     name: "libbluetooth",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     header_libs: ["libbluetooth_headers"],
+     export_header_lib_headers: ["libbluetooth_headers"],
+     srcs: [
+@@ -98,7 +98,7 @@ cc_library_shared {
+ cc_library_static {
+     name: "libbluetooth-for-tests",
+     defaults: ["fluoride_defaults"],
+-
++    sdclang: true,
+     srcs: [
+         "bte_conf.cc",
+         "bte_init.cc",
+diff --git a/osi/Android.bp b/osi/Android.bp
+index ad2f44bef..e387fffa1 100644
+--- a/osi/Android.bp
++++ b/osi/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_defaults {
+     name: "fluoride_osi_defaults",
+     defaults: ["fluoride_defaults"],
+@@ -14,6 +15,7 @@ cc_defaults {
+ cc_test_library {
+     name: "libosi-AllocationTestHarness",
+     defaults: ["fluoride_osi_defaults"],
++    sdclang: true,
+     srcs: [
+         "test/AllocationTestHarness.cc",
+     ],
+@@ -40,6 +42,7 @@ cc_test_library {
+ cc_library_static {
+     name: "libosi",
+     defaults: ["fluoride_osi_defaults"],
++    sdclang: true,
+     // TODO(mcchou): Remove socket_utils sources after platform specific
+     // dependencies are abstracted.
+     srcs: [
+diff --git a/packet/Android.bp b/packet/Android.bp
+index 8338c2d8e..c57e0658d 100644
+--- a/packet/Android.bp
++++ b/packet/Android.bp
+@@ -1,3 +1,4 @@
++//
+ cc_library_static {
+     name: "lib-bt-packets",
+     defaults: ["libchrome_support_defaults"],
+@@ -10,6 +11,7 @@ cc_library_static {
+         "lib-bt-packets-base",
+         "lib-bt-packets-avrcp",
+     ],
++    sdclang: true,
+ }
+ 
+ cc_test {
+diff --git a/packet/avrcp/Android.bp b/packet/avrcp/Android.bp
+index 80e93e885..181925c06 100644
+--- a/packet/avrcp/Android.bp
++++ b/packet/avrcp/Android.bp
+@@ -1,6 +1,8 @@
++//
+ cc_library_static {
+     name: "lib-bt-packets-avrcp",
+     defaults: ["libchrome_support_defaults"],
++    sdclang: true,
+     header_libs: ["avrcp_headers"],
+     export_header_lib_headers: ["avrcp_headers"],
+     export_include_dirs: ["."],
+diff --git a/packet/base/Android.bp b/packet/base/Android.bp
+index 67f77d6b2..8577ca44e 100644
+--- a/packet/base/Android.bp
++++ b/packet/base/Android.bp
+@@ -1,6 +1,8 @@
++//
+ cc_library_static {
+     name: "lib-bt-packets-base",
+     defaults: ["libchrome_support_defaults"],
++    sdclang: true,
+     export_include_dirs: ["./"],
+     host_supported: true,
+     srcs: [
+diff --git a/profile/avrcp/Android.bp b/profile/avrcp/Android.bp
+index 3d95e9f32..f291b3063 100644
+--- a/profile/avrcp/Android.bp
++++ b/profile/avrcp/Android.bp
+@@ -1,6 +1,8 @@
++//
+ cc_library_static {
+     name: "avrcp-target-service",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     host_supported: true,
+     include_dirs: [
+         "system/bt",
+diff --git a/proto/Android.bp b/proto/Android.bp
+index 0f97c7243..4d02647c7 100644
+--- a/proto/Android.bp
++++ b/proto/Android.bp
+@@ -1,3 +1,4 @@
++//
+ java_library_static {
+     name: "bluetooth-protos-lite",
+     host_supported: true,
+diff --git a/service/Android.bp b/service/Android.bp
+index d24e0fab4..b89ad373b 100644
+--- a/service/Android.bp
++++ b/service/Android.bp
+@@ -1,3 +1,4 @@
++//
+ subdirs = [
+     "common",
+ ]
+@@ -67,6 +68,7 @@ btserviceBaseTestSrc = [
+ cc_binary {
+     name: "bluetoothtbd",
+     defaults: ["fluoride_service_defaults"],
++    sdclang: true,
+     srcs: btserviceBinderDaemonSrc +
+     btserviceLinuxSrc +
+     btserviceDaemonSrc +
+@@ -149,6 +151,7 @@ cc_test {
+ cc_binary {
+     name: "bluetooth-cli",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     srcs: ["client/main.cc"],
+     static_libs: [
+         "libbluetooth-binder-common",
+@@ -164,6 +167,7 @@ cc_binary {
+ cc_binary {
+     name: "bt-example-hr-server",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     local_include_dirs: ["example/heart_rate"],
+     srcs: [
+         "example/heart_rate/heart_rate_server.cc",
+@@ -181,6 +185,7 @@ cc_binary {
+ cc_library_static {
+     name: "libbluetoothtbd_hal",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     include_dirs: ["system/bt"],
+     header_libs: ["libbluetooth_headers"],
+     srcs: [
+diff --git a/service/common/Android.bp b/service/common/Android.bp
+index b3fbfc458..718baae86 100644
+--- a/service/common/Android.bp
++++ b/service/common/Android.bp
+@@ -25,12 +25,14 @@ cc_library_static {
+     shared_libs: [
+         "libbase",
+     ],
++    sdclang: true,
+ }
+ 
+ // Bluetooth Binder shared library
+ cc_library_static {
+     name: "libbluetooth-binder-common",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     cflags: [
+         /* we export all classes, so change default visibility, instead of having EXPORT_SYMBOL on each class*/
+         "-fvisibility=default",
+diff --git a/stack/Android.bp b/stack/Android.bp
+index 03e2c940b..5dd69529a 100644
+--- a/stack/Android.bp
++++ b/stack/Android.bp
+@@ -3,6 +3,7 @@
+ cc_library_static {
+     name: "libbt-stack",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     local_include_dirs: [
+         "include",
+         "avct",
+diff --git a/test/rootcanal/Android.bp b/test/rootcanal/Android.bp
+index 7371c999f..b04777513 100644
+--- a/test/rootcanal/Android.bp
++++ b/test/rootcanal/Android.bp
+@@ -54,6 +54,7 @@ cc_binary {
+         "system/bt/stack/include",
+     ],
+     init_rc: ["android.hardware.bluetooth@1.0-service.sim.rc"],
++    sdclang: true,
+ }
+ 
+ cc_library_shared {
+@@ -93,4 +94,5 @@ cc_library_shared {
+         "system/bt/internal_include",
+         "system/bt/stack/include",
+     ],
++    sdclang: true,
+ }
+diff --git a/tools/mcap_tool/Android.bp b/tools/mcap_tool/Android.bp
+index eec750ced..b66c9becc 100644
+--- a/tools/mcap_tool/Android.bp
++++ b/tools/mcap_tool/Android.bp
+@@ -37,5 +37,6 @@ cc_binary {
+     static_libs: [
+       "libbtcore",
+       "libosi",
+-    ]
++    ],
++    sdclang: true,
+ }
+diff --git a/types/Android.bp b/types/Android.bp
+index 5867d63e3..d8a6f7e2c 100644
+--- a/types/Android.bp
++++ b/types/Android.bp
+@@ -9,6 +9,7 @@ cc_library_headers {
+ cc_library_static {
+     name: "libbluetooth-types",
+     vendor_available: true,
++    sdclang: true,
+     defaults: ["fluoride_types_defaults"],
+     cflags: [
+         /* we export all classes, so change default visibility, instead of having EXPORT_SYMBOL on each class*/
+diff --git a/udrv/Android.bp b/udrv/Android.bp
+index 9bf1d839f..1afa9b0e0 100644
+--- a/udrv/Android.bp
++++ b/udrv/Android.bp
+@@ -1,6 +1,8 @@
++//
+ cc_library_static {
+     name: "libudrv-uipc",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     srcs: [
+         "ulinux/uipc.cc",
+     ],
+diff --git a/utils/Android.bp b/utils/Android.bp
+index 6a6c51080..a95864732 100644
+--- a/utils/Android.bp
++++ b/utils/Android.bp
+@@ -3,6 +3,7 @@
+ cc_library_static {
+     name: "libbt-utils",
+     defaults: ["fluoride_defaults"],
++    sdclang: true,
+     local_include_dirs: [
+         "include",
+     ],
+diff --git a/vendor_libs/linux/interface/Android.bp b/vendor_libs/linux/interface/Android.bp
+index 8d6caa4dc..7800483cd 100644
+--- a/vendor_libs/linux/interface/Android.bp
++++ b/vendor_libs/linux/interface/Android.bp
+@@ -39,5 +39,6 @@ cc_binary {
+         "-std=c99",
+     ],
+     init_rc: ["android.hardware.bluetooth@1.0-service.btlinux.rc"],
++    sdclang: true,
+ }
+ 
+diff --git a/vendor_libs/test_vendor_lib/Android.bp b/vendor_libs/test_vendor_lib/Android.bp
+index ef927f47e..96d84102e 100644
+--- a/vendor_libs/test_vendor_lib/Android.bp
++++ b/vendor_libs/test_vendor_lib/Android.bp
+@@ -52,7 +52,8 @@ cc_library_static {
+     ],
+     static_libs: [
+         "libbluetooth-types",
+-    ]
++    ],
++    sdclang: true,
+ }
+ 
+ // test-vendor unit tests for host
+-- 
+2.20.1
+
